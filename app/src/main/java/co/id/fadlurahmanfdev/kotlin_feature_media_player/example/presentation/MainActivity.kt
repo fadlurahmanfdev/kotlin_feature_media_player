@@ -1,5 +1,6 @@
 package co.id.fadlurahmanfdev.kotlin_feature_media_player.example.presentation
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -55,8 +56,9 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
     override fun onClicked(item: FeatureModel) {
         when (item.enum) {
             "PLAY_REMOTE_MUSIC" -> {
+                val intent = Intent(this, RemoteMusicPlayerActivity::class.java)
+                startActivity(intent)
             }
-
         }
     }
 }

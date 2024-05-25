@@ -1,103 +1,162 @@
 package co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.common
 
 import android.content.Context
-import android.media.AudioDeviceInfo
-import android.media.AudioManager
-import android.os.Build
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import androidx.annotation.RequiresApi
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
-import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.cache.CacheDataSink
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.MusicPlayerState
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.utilities.CacheUtilities
 
 @UnstableApi
-abstract class BaseMusicPlayer(private val context: Context) {
-    private var audioManager: AudioManager =
-        context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    val handler = Handler(Looper.getMainLooper())
-    lateinit var exoPlayer: ExoPlayer
+abstract class BaseMusicPlayer(val context: Context) : Player.Listener, AnalyticsListener {
+    private lateinit var exoPlayer: ExoPlayer
+    private var callback: Callback? = null
+    private var _duration: Long = 0L
+    val duration: Long
+        get() = _duration
+    private var _position: Long = 0L
+    val position: Long
+        get() = _position
+    private var _musicPlayerState: MusicPlayerState = MusicPlayerState.IDLE
+    val musicPlayerState: MusicPlayerState
+        get() = _musicPlayerState
 
-    private fun getExoPlayerBuilder(): ExoPlayer.Builder {
-        return ExoPlayer.Builder(context)
+    fun setCallback(callback: Callback) {
+        this.callback = callback
     }
 
-    open fun initExoPlayer() {
-        exoPlayer = getExoPlayerBuilder().build()
-        exoPlayer.playWhenReady = true
+    open fun initialize() {
+        exoPlayer = ExoPlayer.Builder(context).build()
+        exoPlayer.addListener(this)
+        exoPlayer.addAnalyticsListener(this)
     }
 
-
-    private var currentDuration: Long? = null
-    private var currentPosition: Long? = null
-    open fun fetchAudioDurationAndPosition(callback: FeatureMusicPlayerCallback) {
-        if (currentDuration == null || (currentDuration
-                ?: 0L) <= 0L || exoPlayer.duration != currentDuration
-        ) {
-            currentDuration = exoPlayer.duration
-            callback.onDurationChanged(currentDuration!!)
-        }
-
-        if (currentPosition == null || exoPlayer.currentPosition != currentPosition) {
-            currentPosition = exoPlayer.currentPosition
-            callback.onPositionChanged(currentPosition!!)
-        }
+    private fun createHttpDatasourceFactory(): DefaultHttpDataSource.Factory {
+        return DefaultHttpDataSource.Factory()
     }
 
-    open fun createCacheDataSinkFactory(): CacheDataSink.Factory {
+    private fun createCacheDataSinkFactory(): CacheDataSink.Factory {
         return CacheDataSink.Factory()
             .setCache(CacheUtilities.getSimpleCache(context))
     }
 
-    open fun createHttpDataSource(): DefaultDataSource.Factory {
-        val dataSource = DefaultHttpDataSource.Factory()
-        return DefaultDataSource.Factory(context, dataSource)
-    }
-
-    open fun createProgressiveMediaSource(
-        datasourceFactory: DataSource.Factory,
-        mediaItem: MediaItem
-    ): ProgressiveMediaSource {
-        return ProgressiveMediaSource.Factory(datasourceFactory).createMediaSource(mediaItem)
-    }
-
-    open fun createCacheDataSource(): CacheDataSource.Factory {
+    private fun createCacheDatasourceFactory(
+        dataSourceFactory: DataSource.Factory
+    ): CacheDataSource.Factory {
         return CacheDataSource.Factory()
             .setCache(CacheUtilities.getSimpleCache(context))
             .setCacheWriteDataSinkFactory(createCacheDataSinkFactory())
             .setCacheReadDataSourceFactory(FileDataSource.Factory())
-            .setUpstreamDataSourceFactory(createHttpDataSource())
+            .setUpstreamDataSourceFactory(dataSourceFactory)
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
     }
 
-    private var currentAudioDeviceInfo: AudioDeviceInfo? = null
+    fun playRemoteAudio(uriString: String) {
+        val dataSourceFactory: DataSource.Factory = createHttpDatasourceFactory()
+        val mediaItem = MediaItem.fromUri(Uri.parse(uriString))
+        val cacheDataSourceFactory = createCacheDatasourceFactory(dataSourceFactory)
+        val mediaSource: MediaSource =
+            ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                .createMediaSource(mediaItem)
+        exoPlayer.setMediaSource(mediaSource)
+        updateOnStateChanged(MusicPlayerState.IDLE)
+        exoPlayer.playWhenReady = true
+        exoPlayer.prepare()
+    }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    fun checkAudioOutputAboveM(callback: FeatureMusicPlayerCallback) {
-        val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-
-
-        if (currentAudioDeviceInfo == null || (devices.isNotEmpty() && currentAudioDeviceInfo?.id != devices.last().id)) {
-            currentAudioDeviceInfo = devices.last()
-            callback.onAudioOutputChanged(currentAudioDeviceInfo!!)
+    fun pause() {
+        if (musicPlayerState == MusicPlayerState.PLAYING) {
+            exoPlayer.pause()
+            updateOnStateChanged(MusicPlayerState.PAUSED)
         }
     }
 
-    interface FeatureMusicPlayerCallback {
+    fun resume() {
+        if (musicPlayerState == MusicPlayerState.PAUSED) {
+            exoPlayer.play()
+            updateOnStateChanged(MusicPlayerState.RESUME)
+            handler.postDelayed({ updateOnStateChanged(MusicPlayerState.PLAYING) }, 500)
+        }
+    }
+
+    /**
+     * position: in milliSecond
+     */
+    fun seekToPosition(position: Long) {
+        exoPlayer.seekTo(position)
+    }
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val fetchDurationAndPositionRunnable = object : Runnable {
+        override fun run() {
+            if (exoPlayer.currentPosition > 0 && position != exoPlayer.currentPosition) {
+                _position = exoPlayer.currentPosition
+                callback?.onPositionChanged(position)
+            }
+
+            handler.postDelayed(this, 250)
+        }
+    }
+
+    override fun onIsLoadingChanged(isLoading: Boolean) {
+        super<Player.Listener>.onIsLoadingChanged(isLoading)
+        Log.d(BaseMusicPlayer::class.java.simpleName, "IS LOADING -> $isLoading")
+    }
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+        super<Player.Listener>.onIsPlayingChanged(isPlaying)
+        Log.d(BaseMusicPlayer::class.java.simpleName, "IS PLAYING -> $isPlaying")
+        if (isPlaying && musicPlayerState != MusicPlayerState.PLAYING) {
+            updateOnStateChanged(MusicPlayerState.PLAYING)
+        }
+    }
+
+    override fun onPlaybackStateChanged(eventTime: AnalyticsListener.EventTime, state: Int) {
+        super<AnalyticsListener>.onPlaybackStateChanged(eventTime, state)
+        Log.d(BaseMusicPlayer::class.java.simpleName, "PLAYBACK STATE -> $state")
+        if (state == Player.STATE_IDLE && musicPlayerState != MusicPlayerState.IDLE) {
+            updateOnStateChanged(MusicPlayerState.IDLE)
+        } else if (state == Player.STATE_BUFFERING && musicPlayerState != MusicPlayerState.LOADING) {
+            updateOnStateChanged(MusicPlayerState.LOADING)
+        } else if (state == Player.STATE_READY && musicPlayerState != MusicPlayerState.READY) {
+            _duration = exoPlayer.duration
+            callback?.onDurationFetched(duration)
+            handler.post(fetchDurationAndPositionRunnable)
+            updateOnStateChanged(MusicPlayerState.READY)
+        } else if (state == Player.STATE_ENDED && musicPlayerState != MusicPlayerState.ENDED) {
+            updateOnStateChanged(MusicPlayerState.ENDED)
+        }
+    }
+
+    private fun updateOnStateChanged(state: MusicPlayerState) {
+        Log.d(BaseMusicPlayer::class.java.simpleName, "current music state: $state")
+        _musicPlayerState = state
+        callback?.onStateChanged(state)
+    }
+
+    fun destroy() {
+        handler.removeCallbacks(fetchDurationAndPositionRunnable)
+        exoPlayer.pause()
+        exoPlayer.stop()
+        exoPlayer.release()
+    }
+
+    interface Callback {
         fun onStateChanged(state: MusicPlayerState) {}
-        //        fun onPlaybackStateChanged(playbackState: Int)
-        fun onDurationChanged(duration: Long)
-        fun onPositionChanged(position: Long)
-        fun onAudioOutputChanged(audioDeviceInfo: AudioDeviceInfo)
-//        fun onErrorHappened(exception: ExoPlaybackException)
+        fun onDurationFetched(duration: Long) {}
+        fun onPositionChanged(position: Long) {}
     }
 }
