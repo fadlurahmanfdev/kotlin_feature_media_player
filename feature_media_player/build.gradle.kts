@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("maven-publish")
 }
 
 android {
@@ -47,4 +48,18 @@ dependencies {
     api("androidx.media3:media3-ui:$media3_version")
     api("androidx.media3:media3-common:$media3_version")
     api("androidx.media3:media3-exoplayer-hls:$media3_version")
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release"){
+            groupId = "co.id.fadlurahmanfdev"
+            artifactId = "kotlin_feature_media_player"
+            version = "0.0.1"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
