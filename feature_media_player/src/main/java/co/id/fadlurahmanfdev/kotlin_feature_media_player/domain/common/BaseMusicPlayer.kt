@@ -18,7 +18,7 @@ import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.MusicPlayerState
-import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.utilities.CacheUtilities
+import co.id.fadlurahmanfdev.kotlin_feature_media_player.others.utilities.CacheUtilities
 
 @UnstableApi
 abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, AnalyticsListener {

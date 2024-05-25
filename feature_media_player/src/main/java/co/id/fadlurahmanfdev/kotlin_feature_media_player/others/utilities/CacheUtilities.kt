@@ -1,4 +1,4 @@
-package co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.utilities
+package co.id.fadlurahmanfdev.kotlin_feature_media_player.others.utilities
 
 import android.content.Context
 import androidx.media3.common.util.UnstableApi
@@ -14,7 +14,7 @@ object CacheUtilities {
     private lateinit var downloadCache: SimpleCache
 
     fun getSimpleCache(context: Context): SimpleCache {
-        return if (::downloadCache.isInitialized) {
+        return if (CacheUtilities::downloadCache.isInitialized) {
             downloadCache
         } else {
             val downloadContentDirectory = File(context.cacheDir, "video_cache")
