@@ -21,7 +21,7 @@ import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.MusicPlayerS
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.utilities.CacheUtilities
 
 @UnstableApi
-abstract class BaseMusicPlayer(val context: Context) : Player.Listener, AnalyticsListener {
+abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, AnalyticsListener {
     private lateinit var exoPlayer: ExoPlayer
     private var callback: Callback? = null
     private var _duration: Long = 0L

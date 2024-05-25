@@ -25,11 +25,13 @@ class RemoteMusicPlayerActivity : AppCompatActivity() {
 
         featureMusicPlayer = FeatureMusicPlayer(this)
         featureMusicPlayer.initialize()
+        featureMusicPlayer.registerListenerHeadsetPlug()
         featureMusicPlayer.playRemoteAudio("https://equran.nos.wjv-1.neo.id/audio-full/Abdullah-Al-Juhany/110.mp3")
     }
 
     @UnstableApi
     override fun onDestroy() {
+        featureMusicPlayer.destroyListener()
         featureMusicPlayer.destroy()
         super.onDestroy()
     }
