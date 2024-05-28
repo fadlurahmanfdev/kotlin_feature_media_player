@@ -15,7 +15,6 @@ import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import co.id.fadlurahmanfdev.kotlin_feature_media_player.R
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.MediaNotificationActionModel
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.AudioNotificationState
 
@@ -23,6 +22,7 @@ class MediaNotificationRepositoryImpl(val context: Context) :
     MediaNotificationRepository {
     private val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private var mediaSession: MediaSessionCompat? = null
 
     override fun isNotificationChannelExist(channelId: String): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -90,9 +90,15 @@ class MediaNotificationRepositoryImpl(val context: Context) :
             AudioNotificationState.PAUSED -> {
                 PlaybackStateCompat.STATE_PAUSED
             }
+
+            AudioNotificationState.ENDED -> {
+                PlaybackStateCompat.STATE_STOPPED
+            }
         }
-        val mediaSession = MediaSessionCompat(context, "MusicPlayerService")
-        mediaSession.setPlaybackState(
+        if(mediaSession == null){
+            mediaSession = MediaSessionCompat(context, "MusicPlayerService")
+        }
+        mediaSession?.setPlaybackState(
             PlaybackStateCompat.Builder()
                 .setState(currentAudioNotificationState, position, 1f)
                 .setActions(PlaybackStateCompat.ACTION_SEEK_TO)
@@ -103,8 +109,8 @@ class MediaNotificationRepositoryImpl(val context: Context) :
             putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
             putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
         }.build()
-        mediaSession.setMetadata(mediaMetaData)
-        mediaSession.setCallback(object : MediaSessionCompat.Callback() {
+        mediaSession?.setMetadata(mediaMetaData)
+        mediaSession?.setCallback(object : MediaSessionCompat.Callback() {
             override fun onSeekTo(pos: Long) {
                 super.onSeekTo(pos)
                 Log.d(
@@ -114,8 +120,10 @@ class MediaNotificationRepositoryImpl(val context: Context) :
             }
         })
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
-            .setMediaSession(mediaSession.sessionToken)
-            .setShowActionsInCompactView(0, 1, 2)
+        if (mediaSession != null) {
+            mediaStyle.setMediaSession(mediaSession!!.sessionToken)
+        }
+        mediaStyle.setShowActionsInCompactView(0, 1, 2)
         return NotificationCompat.Builder(context, channelId).setSmallIcon(smallIcon)
             .setStyle(mediaStyle)
     }

@@ -71,6 +71,18 @@ class ExampleMediaNotificationRepositoryImpl(
                         )
                     )
                 )
+            } else if(currentAudioState == AudioNotificationState.ENDED){
+                add(
+                    MediaNotificationActionModel(
+                        icon = co.id.fadlurahmanfdev.kotlin_feature_media_player.R.drawable.round_play_arrow_24,
+                        title = "RePlay",
+                        pendingIntent = FeatureMusicPlayerManager.getResumePendingIntent(
+                            context,
+                            notificationId = notificationId,
+                            ExampleMusicPlayerReceiver::class.java
+                        )
+                    )
+                )
             }
 
             add(
@@ -106,6 +118,7 @@ class ExampleMediaNotificationRepositoryImpl(
         position: Long,
         duration: Long
     ) {
+        println("MASUK_ EXAMPLE AUDIO STATE: $currentAudioState")
         val notification = getMediaNotification(
             context,
             notificationId = notificationId,

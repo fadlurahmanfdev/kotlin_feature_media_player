@@ -19,10 +19,6 @@ class FeatureMusicPlayerReceiverManager(val context: Context) {
     private val receiver = object : BroadcastReceiver() {
         @UnstableApi
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d(
-                FeatureMusicPlayerManager::class.java.simpleName,
-                "on receive from broadcast receiver for action: ${intent?.action}"
-            )
             duration =
                 intent?.getLongExtra(FeatureMusicPlayerService.PARAM_DURATION, -1L) ?: -1L
             position =

@@ -67,7 +67,10 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
                 putExtra(PARAM_POSITION, position)
                 putExtra(PARAM_STATE, state.name)
             }
-            Log.d(FeatureMusicPlayerService::class.java.simpleName, "send broadcast success: $position & $duration")
+            Log.d(
+                FeatureMusicPlayerService::class.java.simpleName,
+                "send broadcast success: $position & $duration"
+            )
             context.sendBroadcast(intent)
         }
     }
@@ -253,13 +256,19 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
             title = currentTitlePlaying ?: "-",
             artist = currentArtistPlaying ?: "-",
             position = musicPlayer.position,
-            duration = musicPlayer.duration
+            duration = musicPlayer.duration,
         )
     }
 
     @UnstableApi
     open fun onAudioEndedState(notificationId: Int) {
-
+        onEndedAudioNotification(
+            notificationId = notificationId,
+            title = currentTitlePlaying ?: "-",
+            artist = currentArtistPlaying ?: "-",
+            position = musicPlayer.position,
+            duration = musicPlayer.duration,
+        )
     }
 
     @UnstableApi

@@ -186,6 +186,7 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
             handler.post(fetchDurationAndPositionRunnable)
             updateOnStateChanged(MusicPlayerState.READY)
         } else if (state == Player.STATE_ENDED && musicPlayerState != MusicPlayerState.ENDED) {
+            handler.removeCallbacks(fetchDurationAndPositionRunnable)
             updateOnStateChanged(MusicPlayerState.ENDED)
         }
     }
