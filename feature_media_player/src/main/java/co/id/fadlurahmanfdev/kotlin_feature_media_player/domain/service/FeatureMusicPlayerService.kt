@@ -19,6 +19,8 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
     private lateinit var musicPlayer: FeatureMusicPlayerManager
     lateinit var mediaNotificationRepository: MediaNotificationRepository
     private var currentNotificationId: Int = -1
+    private lateinit var audioUrls: List<String>
+    private lateinit var currentAudioUrlPlaying: String
     private var currentTitlePlaying: String? = null
     private var currentArtistPlaying: String? = null
 
@@ -29,14 +31,18 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
             "co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PAUSE_AUDIO"
         const val ACTION_RESUME_AUDIO =
             "co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_RESUME_AUDIO"
+        const val ACTION_PREVIOUS_AUDIO =
+            "co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PREVIOUS_AUDIO"
+        const val ACTION_NEXT_AUDIO =
+            "co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_NEXT_AUDIO"
         const val ACTION_REWIND_AUDIO =
             "co.id.fadlurahmanfdev.feature_media_player.ACTION_REWIND_AUDIO"
         const val ACTION_FORWARD_AUDIO =
             "co.id.fadlurahmanfdev.feature_media_player.ACTION_FORWARD_AUDIO"
         const val ACTION_SEEK_TO_POSITION =
             "co.id.fadlurahmanfdev.feature_media_player.ACTION_SEEK_TO_POSITION"
-        const val ACTION_SEND_INFO =
-            "co.id.fadlurahmanfdev.feature_media_player.ACTION_SEND_INFO"
+        const val SEND_INFO =
+            "co.id.fadlurahmanfdev.kotlin_feature_media_player.SEND_INFO"
 
         // param related
         const val PARAM_NOTIFICATION_ID = "PARAM_NOTIFICATION_ID"
@@ -56,11 +62,12 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
             state: MusicPlayerState
         ) {
             val intent = Intent().apply {
-                action = ACTION_SEND_INFO
+                action = SEND_INFO
                 putExtra(PARAM_DURATION, duration)
                 putExtra(PARAM_POSITION, position)
                 putExtra(PARAM_STATE, state.name)
             }
+            Log.d(FeatureMusicPlayerService::class.java.simpleName, "send broadcast success: $position & $duration")
             context.sendBroadcast(intent)
         }
     }
@@ -97,17 +104,18 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
         when (action) {
             ACTION_PLAY_REMOTE_AUDIO -> {
                 currentNotificationId = intent.getIntExtra(PARAM_NOTIFICATION_ID, -1)
-                val audioUrl = intent.getStringExtra(PARAM_AUDIO_URL)
+                audioUrls = intent.getStringArrayListExtra(PARAM_AUDIO_URL) ?: listOf()
                 currentArtistPlaying = intent.getStringExtra(PARAM_TITLE)
                 currentTitlePlaying = intent.getStringExtra(PARAM_ARTIST)
                 Log.d(
                     FeatureMusicPlayerService::class.java.simpleName,
                     "prepare for play remote audio & start foreground, title: $currentTitlePlaying & artist: $currentArtistPlaying"
                 )
-                if (currentNotificationId != -1 && audioUrl != null) {
+                if (currentNotificationId != -1 && audioUrls.isNotEmpty()) {
+                    currentAudioUrlPlaying = audioUrls.first()
                     onPlayRemoteAudioAndStartForeground(
                         notificationId = currentNotificationId,
-                        url = audioUrl,
+                        urls = audioUrls,
                         title = currentTitlePlaying ?: "-",
                         artist = currentArtistPlaying ?: "-"
                     )
@@ -141,12 +149,34 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
                 }
             }
 
+            ACTION_PREVIOUS_AUDIO -> {
+                if (currentNotificationId != -1) {
+                    onPreviousAudio(currentNotificationId)
+                } else {
+                    Log.e(
+                        FeatureMusicPlayerService::class.java.simpleName,
+                        "$action -> notificationId missing"
+                    )
+                }
+            }
+
+            ACTION_NEXT_AUDIO -> {
+                if (currentNotificationId != -1) {
+                    onNextAudio(currentNotificationId)
+                } else {
+                    Log.e(
+                        FeatureMusicPlayerService::class.java.simpleName,
+                        "$action -> notificationId missing"
+                    )
+                }
+            }
+
 
             ACTION_SEEK_TO_POSITION -> {
-                val seekToPosition = intent.getLongExtra(PARAM_SEEK_TO_POSITION, -1L)
-                if (seekToPosition != -1L) {
-                    musicPlayer.seekToPosition(seekToPosition)
-                }
+//                val seekToPosition = intent.getLongExtra(PARAM_SEEK_TO_POSITION, -1L)
+//                if (seekToPosition != -1L) {
+//                    musicPlayer.seekToPosition(seekToPosition)
+//                }
             }
         }
         return START_STICKY
@@ -155,6 +185,12 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
     @OptIn(UnstableApi::class)
     override fun onPositionChanged(position: Long) {
         super.onPositionChanged(position)
+        sendBroadcastSendInfo(
+            applicationContext,
+            position = position,
+            duration = musicPlayer.duration,
+            state = musicPlayer.musicPlayerState,
+        )
         onUpdatePositionNotification(
             notificationId = currentNotificationId,
             title = currentTitlePlaying ?: "-",
@@ -162,12 +198,6 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
             position = position,
             duration = musicPlayer.duration
         )
-//        sendBroadcastSendInfo(
-//            applicationContext,
-//            musicPlayer.position,
-//            musicPlayer.duration,
-//            musicPlayer.musicPlayerState
-//        )
     }
 
     @UnstableApi
@@ -200,11 +230,11 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
     @UnstableApi
     open fun onPlayRemoteAudioAndStartForeground(
         notificationId: Int,
-        url: String,
+        urls: List<String>,
         title: String,
         artist: String
     ) {
-        musicPlayer.playRemoteAudio(url)
+        musicPlayer.playRemoteAudio(urls)
         startForeground(
             notificationId,
             onGetNotification(
@@ -235,13 +265,16 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
     @UnstableApi
     open fun onResumeAudio(notificationId: Int) {
         musicPlayer.resume()
-        onUpdatePauseNotification(
-            notificationId = notificationId,
-            title = currentTitlePlaying ?: "-",
-            artist = currentArtistPlaying ?: "-",
-            position = musicPlayer.position,
-            duration = musicPlayer.duration
-        )
+    }
+
+    @UnstableApi
+    open fun onPreviousAudio(notificationId: Int) {
+        musicPlayer.seekToPrevious()
+    }
+
+    @UnstableApi
+    open fun onNextAudio(notificationId: Int) {
+        musicPlayer.seekToNext()
     }
 
     abstract fun onGetNotification(

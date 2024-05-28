@@ -11,6 +11,9 @@ abstract class FeatureMusicPlayerReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_PAUSE_AUDIO = FeatureMusicPlayerService.ACTION_PAUSE_AUDIO
         const val ACTION_RESUME_AUDIO = FeatureMusicPlayerService.ACTION_RESUME_AUDIO
+        const val ACTION_PREVIOUS_AUDIO = FeatureMusicPlayerService.ACTION_PREVIOUS_AUDIO
+        const val ACTION_NEXT_AUDIO = FeatureMusicPlayerService.ACTION_NEXT_AUDIO
+        const val SEND_INFO = FeatureMusicPlayerService.SEND_INFO
 
         const val PARAM_NOTIFICATION_ID = FeatureMusicPlayerService.PARAM_NOTIFICATION_ID
     }
@@ -50,9 +53,35 @@ abstract class FeatureMusicPlayerReceiver : BroadcastReceiver() {
                     )
                 }
             }
+
+            ACTION_PREVIOUS_AUDIO -> {
+                val notificationId = intent.getIntExtra(PARAM_NOTIFICATION_ID, -1)
+                if (notificationId != -1) {
+                    onPreviousAudio(context)
+                } else {
+                    Log.e(
+                        FeatureMusicPlayerReceiver::class.java.simpleName,
+                        "$action -> notificationId is missing"
+                    )
+                }
+            }
+
+            ACTION_NEXT_AUDIO -> {
+                val notificationId = intent.getIntExtra(PARAM_NOTIFICATION_ID, -1)
+                if (notificationId != -1) {
+                    onNextAudio(context)
+                } else {
+                    Log.e(
+                        FeatureMusicPlayerReceiver::class.java.simpleName,
+                        "$action -> notificationId is missing"
+                    )
+                }
+            }
         }
     }
 
     abstract fun onPauseAudio(context: Context)
     abstract fun onResumeAudio(context: Context)
+    abstract fun onPreviousAudio(context: Context)
+    abstract fun onNextAudio(context: Context)
 }

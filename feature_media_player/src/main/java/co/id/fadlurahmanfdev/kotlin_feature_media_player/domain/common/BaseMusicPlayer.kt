@@ -77,6 +77,27 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
         exoPlayer.prepare()
     }
 
+    fun playRemoteAudio(listUriString: List<String>) {
+        val dataSourceFactory: DataSource.Factory = createHttpDatasourceFactory()
+        val mediaItems = arrayListOf<MediaItem>()
+        repeat(listUriString.size) { index ->
+            val mediaItem = MediaItem.fromUri(Uri.parse(listUriString[index]))
+            mediaItems.add(mediaItem)
+        }
+        val cacheDataSourceFactory = createCacheDatasourceFactory(dataSourceFactory)
+        val mediaSources = arrayListOf<MediaSource>()
+        repeat(mediaItems.size) { index ->
+            val mediaSource: MediaSource =
+                ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                    .createMediaSource(mediaItems[index])
+            mediaSources.add(mediaSource)
+        }
+        exoPlayer.setMediaSources(mediaSources)
+        updateOnStateChanged(MusicPlayerState.IDLE)
+        exoPlayer.playWhenReady = true
+        exoPlayer.prepare()
+    }
+
     fun pause() {
         if (musicPlayerState == MusicPlayerState.PLAYING) {
             handler.removeCallbacks(fetchDurationAndPositionRunnable)
@@ -91,6 +112,32 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
             exoPlayer.play()
             updateOnStateChanged(MusicPlayerState.RESUME)
             handler.postDelayed({ updateOnStateChanged(MusicPlayerState.PLAYING) }, 500)
+        }
+    }
+
+    fun seekToPrevious() {
+        if (exoPlayer.currentPosition > 3000) {
+            Log.d(BaseMusicPlayer::class.java.simpleName, "seek to 0 cause current position > 3000")
+            exoPlayer.seekTo(0)
+        } else if (exoPlayer.hasPreviousMediaItem()) {
+            Log.d(BaseMusicPlayer::class.java.simpleName, "seek to previous media item")
+        } else {
+            Log.d(
+                BaseMusicPlayer::class.java.simpleName,
+                "unable to seek to previous media item cause player didnt have previous media item"
+            )
+        }
+    }
+
+    fun seekToNext() {
+        if (exoPlayer.hasNextMediaItem()) {
+            Log.d(BaseMusicPlayer::class.java.simpleName, "seek to next media item")
+            exoPlayer.seekToNextMediaItem()
+        } else {
+            Log.d(
+                BaseMusicPlayer::class.java.simpleName,
+                "unable to seek to next media item cause player didnt have next media item"
+            )
         }
     }
 
