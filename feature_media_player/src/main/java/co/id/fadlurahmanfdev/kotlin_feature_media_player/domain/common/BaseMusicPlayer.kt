@@ -79,6 +79,7 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
 
     fun pause() {
         if (musicPlayerState == MusicPlayerState.PLAYING) {
+            handler.removeCallbacks(fetchDurationAndPositionRunnable)
             exoPlayer.pause()
             updateOnStateChanged(MusicPlayerState.PAUSED)
         }
@@ -86,6 +87,7 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
 
     fun resume() {
         if (musicPlayerState == MusicPlayerState.PAUSED) {
+            handler.post(fetchDurationAndPositionRunnable)
             exoPlayer.play()
             updateOnStateChanged(MusicPlayerState.RESUME)
             handler.postDelayed({ updateOnStateChanged(MusicPlayerState.PLAYING) }, 500)

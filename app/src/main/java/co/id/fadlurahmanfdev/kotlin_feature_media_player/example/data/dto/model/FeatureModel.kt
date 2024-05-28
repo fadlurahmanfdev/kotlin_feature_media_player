@@ -1,4 +1,4 @@
-package co.id.fadlurahmanfdev.kotlin_feature_media_player.example.data
+package co.id.fadlurahmanfdev.kotlin_feature_media_player.example.data.dto.model
 
 import androidx.annotation.DrawableRes
 

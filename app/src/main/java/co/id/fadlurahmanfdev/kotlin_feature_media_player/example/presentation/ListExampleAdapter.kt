@@ -7,7 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.example.R
-import co.id.fadlurahmanfdev.kotlin_feature_media_player.example.data.FeatureModel
+import co.id.fadlurahmanfdev.kotlin_feature_media_player.example.data.dto.model.FeatureModel
 
 class ListExampleAdapter : RecyclerView.Adapter<ListExampleAdapter.ViewHolder>() {
     val items: ArrayList<FeatureModel> = arrayListOf()
