@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -214,52 +213,57 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
             }
 
             MusicPlayerState.PLAYING -> {
-                onUpdatePlayingAudioNotification(
+                onUpdateAudioStateNotification(
                     notificationId = currentNotificationId,
                     title = currentTitlePlaying ?: "-",
                     artist = currentArtistPlaying ?: "-",
                     position = musicPlayer.position,
                     duration = musicPlayer.duration,
+                    musicPlayerState = MusicPlayerState.PLAYING
                 )
             }
 
             MusicPlayerState.SEEK_TO_ZERO -> {
-                onUpdatePlayingAudioNotification(
+                onUpdateAudioStateNotification(
                     notificationId = currentNotificationId,
                     title = currentTitlePlaying ?: "-",
                     artist = currentArtistPlaying ?: "-",
                     position = musicPlayer.position,
                     duration = musicPlayer.duration,
+                    musicPlayerState = MusicPlayerState.PLAYING
                 )
             }
 
             MusicPlayerState.SEEK_TO_PREVIOUS -> {
-                onUpdatePlayingAudioNotification(
+                onUpdateAudioStateNotification(
                     notificationId = currentNotificationId,
                     title = currentTitlePlaying ?: "-",
                     artist = currentArtistPlaying ?: "-",
                     position = musicPlayer.position,
                     duration = musicPlayer.duration,
+                    musicPlayerState = MusicPlayerState.PLAYING
                 )
             }
 
             MusicPlayerState.SEEK_TO_NEXT -> {
-                onUpdatePlayingAudioNotification(
+                onUpdateAudioStateNotification(
                     notificationId = currentNotificationId,
                     title = currentTitlePlaying ?: "-",
                     artist = currentArtistPlaying ?: "-",
                     position = musicPlayer.position,
                     duration = musicPlayer.duration,
+                    musicPlayerState = MusicPlayerState.PLAYING,
                 )
             }
 
             MusicPlayerState.PAUSED -> {
-                onUpdatePauseAudioNotification(
+                onUpdateAudioStateNotification(
                     notificationId = currentNotificationId,
                     title = currentTitlePlaying ?: "-",
                     artist = currentArtistPlaying ?: "-",
                     position = musicPlayer.position,
                     duration = musicPlayer.duration,
+                    musicPlayerState = MusicPlayerState.PAUSED,
                 )
             }
 
@@ -304,12 +308,13 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
 
     @UnstableApi
     open fun onAudioEndedState(notificationId: Int) {
-        onEndedAudioNotification(
+        onUpdateAudioStateNotification(
             notificationId = notificationId,
             title = currentTitlePlaying ?: "-",
             artist = currentArtistPlaying ?: "-",
             position = musicPlayer.position,
             duration = musicPlayer.duration,
+            musicPlayerState = MusicPlayerState.ENDED
         )
     }
 
@@ -335,28 +340,13 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
         mediaSession: MediaSessionCompat
     ): Notification
 
-    abstract fun onUpdatePlayingAudioNotification(
+    abstract fun onUpdateAudioStateNotification(
         notificationId: Int,
         title: String,
         artist: String,
         position: Long,
-        duration: Long
-    )
-
-    abstract fun onUpdatePauseAudioNotification(
-        notificationId: Int,
-        title: String,
-        artist: String,
-        position: Long,
-        duration: Long
-    )
-
-    abstract fun onEndedAudioNotification(
-        notificationId: Int,
-        title: String,
-        artist: String,
-        position: Long,
-        duration: Long
+        duration: Long,
+        musicPlayerState: MusicPlayerState
     )
 
     @OptIn(UnstableApi::class)
