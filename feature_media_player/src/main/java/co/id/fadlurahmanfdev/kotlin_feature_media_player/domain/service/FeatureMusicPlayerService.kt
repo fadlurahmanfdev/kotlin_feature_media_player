@@ -5,6 +5,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -23,6 +25,7 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
     private lateinit var currentAudioUrlPlaying: String
     private var currentTitlePlaying: String? = null
     private var currentArtistPlaying: String? = null
+    var mediaSession: MediaSessionCompat? = null
 
     companion object {
         const val ACTION_PLAY_REMOTE_AUDIO =
@@ -55,7 +58,7 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
         const val PARAM_ARTIST = "PARAM_ARTIST"
 
 
-        fun sendBroadcastSendInfo(
+        private fun sendBroadcastSendInfo(
             context: Context,
             position: Long,
             duration: Long,
@@ -87,6 +90,8 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
         musicPlayer = FeatureMusicPlayerManager(applicationContext)
         musicPlayer.initialize()
         musicPlayer.setCallback(this)
+
+        mediaSession = MediaSessionCompat(this, "FeatureMusicPlayerService")
         Log.d(
             FeatureMusicPlayerService::class.java.simpleName,
             "successfully on create ${FeatureMusicPlayerService::class.java.simpleName}"
@@ -199,12 +204,6 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
             FeatureMusicPlayerService::class.java.simpleName,
             "${FeatureMusicPlayerService::class.java.simpleName} onStateChanged: $state"
         )
-//        sendBroadcastSendInfo(
-//            applicationContext,
-//            musicPlayer.position,
-//            musicPlayer.duration,
-//            musicPlayer.musicPlayerState
-//        )
         when (state) {
             MusicPlayerState.IDLE -> {
 
@@ -284,12 +283,16 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
         artist: String
     ) {
         musicPlayer.playRemoteAudio(urls)
+        if (mediaSession == null) {
+            mediaSession = MediaSessionCompat(applicationContext, "FeatureMusicPlayerService")
+        }
         startForeground(
             notificationId,
             onIdleAudioNotification(
                 notificationId = notificationId,
                 title = title,
-                artist = artist
+                artist = artist,
+                mediaSession = mediaSession!!
             )
         )
     }
@@ -328,7 +331,8 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
     abstract fun onIdleAudioNotification(
         notificationId: Int,
         title: String,
-        artist: String
+        artist: String,
+        mediaSession: MediaSessionCompat
     ): Notification
 
     abstract fun onUpdatePlayingAudioNotification(
@@ -358,6 +362,8 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
     @OptIn(UnstableApi::class)
     override fun onDestroy() {
         musicPlayer.destroy()
+        mediaSession?.release()
+        mediaSession = null
         super.onDestroy()
     }
 }

@@ -1,6 +1,7 @@
 package co.id.fadlurahmanfdev.kotlin_feature_media_player.example.domain.service
 
 import android.app.Notification
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.AudioNotificationState
@@ -14,23 +15,16 @@ class ExampleMusicPlayerService : FeatureMusicPlayerService() {
     @UnstableApi
     override fun onCreate() {
         super.onCreate()
-        Log.d(
-            ExampleMusicPlayerService::class.java.simpleName,
-            "on create ${ExampleMusicPlayerService::class.java.simpleName}"
-        )
         exampleMediaNotificationRepository = ExampleMediaNotificationRepositoryImpl(
             mediaNotificationRepository = mediaNotificationRepository,
-        )
-        Log.d(
-            ExampleMusicPlayerService::class.java.simpleName,
-            "successfully on create ${ExampleMusicPlayerService::class.java.simpleName}"
         )
     }
 
     override fun onIdleAudioNotification(
         notificationId: Int,
         title: String,
-        artist: String
+        artist: String,
+        mediaSession: MediaSessionCompat,
     ): Notification {
         return exampleMediaNotificationRepository.getMediaNotification(
             context = applicationContext,
@@ -40,6 +34,7 @@ class ExampleMusicPlayerService : FeatureMusicPlayerService() {
             artist = artist,
             position = 0,
             duration = 0,
+            mediaSession = mediaSession
         )
     }
 
@@ -50,15 +45,18 @@ class ExampleMusicPlayerService : FeatureMusicPlayerService() {
         position: Long,
         duration: Long
     ) {
-        exampleMediaNotificationRepository.updateMediaNotification(
-            applicationContext,
-            notificationId = notificationId,
-            title = title,
-            artist = artist,
-            position = position,
-            duration = duration,
-            currentAudioState = AudioNotificationState.PLAYING,
-        )
+        if (mediaSession != null) {
+            exampleMediaNotificationRepository.updateMediaNotification(
+                applicationContext,
+                notificationId = notificationId,
+                currentAudioState = AudioNotificationState.PLAYING,
+                title = title,
+                artist = artist,
+                position = position,
+                duration = duration,
+                mediaSession = mediaSession!!
+            )
+        }
     }
 
     override fun onUpdatePauseAudioNotification(
@@ -68,15 +66,18 @@ class ExampleMusicPlayerService : FeatureMusicPlayerService() {
         position: Long,
         duration: Long
     ) {
-        exampleMediaNotificationRepository.updateMediaNotification(
-            applicationContext,
-            notificationId = notificationId,
-            title = title,
-            artist = artist,
-            position = position,
-            duration = duration,
-            currentAudioState = AudioNotificationState.PAUSED,
-        )
+        if (mediaSession != null) {
+            exampleMediaNotificationRepository.updateMediaNotification(
+                applicationContext,
+                notificationId = notificationId,
+                currentAudioState = AudioNotificationState.PAUSED,
+                title = title,
+                artist = artist,
+                position = position,
+                duration = duration,
+                mediaSession = mediaSession!!
+            )
+        }
     }
 
     override fun onEndedAudioNotification(
@@ -86,14 +87,17 @@ class ExampleMusicPlayerService : FeatureMusicPlayerService() {
         position: Long,
         duration: Long
     ) {
-        exampleMediaNotificationRepository.updateMediaNotification(
-            applicationContext,
-            notificationId = notificationId,
-            title = title,
-            artist = artist,
-            position = position,
-            duration = duration,
-            currentAudioState = AudioNotificationState.ENDED,
-        )
+        if (mediaSession != null) {
+            exampleMediaNotificationRepository.updateMediaNotification(
+                applicationContext,
+                notificationId = notificationId,
+                currentAudioState = AudioNotificationState.ENDED,
+                title = title,
+                artist = artist,
+                position = position,
+                duration = duration,
+                mediaSession = mediaSession!!
+            )
+        }
     }
 }
