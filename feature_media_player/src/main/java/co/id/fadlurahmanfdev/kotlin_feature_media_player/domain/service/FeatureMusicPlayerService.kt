@@ -265,6 +265,12 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
                     duration = musicPlayer.duration,
                     musicPlayerState = MusicPlayerState.PAUSED,
                 )
+                sendBroadcastSendInfo(
+                    applicationContext,
+                    position = musicPlayer.position,
+                    duration = musicPlayer.duration,
+                    state = MusicPlayerState.PAUSED,
+                )
             }
 
             MusicPlayerState.RESUME -> {}
