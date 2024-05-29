@@ -82,8 +82,9 @@ class MediaNotificationRepositoryImpl(val context: Context) :
         position: Long,
         duration: Long,
     ): NotificationCompat.Builder {
-        val currentAudioNotificationState = when (currentAudioState) {
-            AudioNotificationState.PLAYING -> {
+        println("masuk_ audio state: ${currentAudioState}")
+        val currentPlaybackState = when (currentAudioState) {
+            AudioNotificationState.PLAYING, AudioNotificationState.IDLE -> {
                 PlaybackStateCompat.STATE_PLAYING
             }
 
@@ -95,13 +96,13 @@ class MediaNotificationRepositoryImpl(val context: Context) :
                 PlaybackStateCompat.STATE_STOPPED
             }
         }
-        if(mediaSession == null){
+        if (mediaSession == null) {
             mediaSession = MediaSessionCompat(context, "MusicPlayerService")
         }
         mediaSession?.setPlaybackState(
             PlaybackStateCompat.Builder()
-                .setState(currentAudioNotificationState, position, 1f)
-                .setActions(PlaybackStateCompat.ACTION_SEEK_TO)
+                .setState(currentPlaybackState, position, 1f)
+                .setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SEEK_TO)
                 .build()
         )
         val mediaMetaData = MediaMetadataCompat.Builder().apply {

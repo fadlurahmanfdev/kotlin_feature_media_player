@@ -27,7 +27,7 @@ class ExampleMusicPlayerService : FeatureMusicPlayerService() {
         )
     }
 
-    override fun onGetNotification(
+    override fun onIdleAudioNotification(
         notificationId: Int,
         title: String,
         artist: String
@@ -35,15 +35,15 @@ class ExampleMusicPlayerService : FeatureMusicPlayerService() {
         return exampleMediaNotificationRepository.getMediaNotification(
             context = applicationContext,
             notificationId = notificationId,
-            currentAudioState = AudioNotificationState.PLAYING,
+            currentAudioState = AudioNotificationState.IDLE,
             title = title,
             artist = artist,
-            position = 10,
-            duration = 20
+            position = 0,
+            duration = 0,
         )
     }
 
-    override fun onUpdatePositionNotification(
+    override fun onUpdatePlayingAudioNotification(
         notificationId: Int,
         title: String,
         artist: String,
@@ -61,7 +61,7 @@ class ExampleMusicPlayerService : FeatureMusicPlayerService() {
         )
     }
 
-    override fun onUpdatePauseNotification(
+    override fun onUpdatePauseAudioNotification(
         notificationId: Int,
         title: String,
         artist: String,

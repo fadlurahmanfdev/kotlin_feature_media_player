@@ -36,17 +36,20 @@ class ExampleMediaNotificationRepositoryImpl(
         duration: Long,
     ): Notification {
         val actions = arrayListOf<MediaNotificationActionModel>().apply {
-            add(
-                MediaNotificationActionModel(
-                    icon = co.id.fadlurahmanfdev.kotlin_feature_media_player.R.drawable.round_skip_previous_24,
-                    title = "Previous",
-                    pendingIntent = FeatureMusicPlayerManager.getPreviousPendingIntent(
-                        context,
-                        notificationId = notificationId,
-                        ExampleMusicPlayerReceiver::class.java
+            if (currentAudioState != AudioNotificationState.IDLE) {
+                add(
+                    MediaNotificationActionModel(
+                        icon = co.id.fadlurahmanfdev.kotlin_feature_media_player.R.drawable.round_skip_previous_24,
+                        title = "Previous",
+                        pendingIntent = FeatureMusicPlayerManager.getPreviousPendingIntent(
+                            context,
+                            notificationId = notificationId,
+                            ExampleMusicPlayerReceiver::class.java
+                        )
                     )
                 )
-            )
+            }
+
             if (currentAudioState == AudioNotificationState.PLAYING) {
                 add(
                     MediaNotificationActionModel(
@@ -71,11 +74,11 @@ class ExampleMediaNotificationRepositoryImpl(
                         )
                     )
                 )
-            } else if(currentAudioState == AudioNotificationState.ENDED){
+            } else if (currentAudioState == AudioNotificationState.ENDED) {
                 add(
                     MediaNotificationActionModel(
                         icon = co.id.fadlurahmanfdev.kotlin_feature_media_player.R.drawable.round_play_arrow_24,
-                        title = "RePlay",
+                        title = "Replay",
                         pendingIntent = FeatureMusicPlayerManager.getResumePendingIntent(
                             context,
                             notificationId = notificationId,
@@ -85,17 +88,19 @@ class ExampleMediaNotificationRepositoryImpl(
                 )
             }
 
-            add(
-                MediaNotificationActionModel(
-                    icon = co.id.fadlurahmanfdev.kotlin_feature_media_player.R.drawable.round_skip_next_24,
-                    title = "Next",
-                    pendingIntent = FeatureMusicPlayerManager.getNextPendingIntent(
-                        context,
-                        notificationId = notificationId,
-                        ExampleMusicPlayerReceiver::class.java
+            if (currentAudioState != AudioNotificationState.IDLE) {
+                add(
+                    MediaNotificationActionModel(
+                        icon = co.id.fadlurahmanfdev.kotlin_feature_media_player.R.drawable.round_skip_next_24,
+                        title = "Next",
+                        pendingIntent = FeatureMusicPlayerManager.getNextPendingIntent(
+                            context,
+                            notificationId = notificationId,
+                            ExampleMusicPlayerReceiver::class.java
+                        )
                     )
                 )
-            )
+            }
         }
         return mediaNotificationRepository.getNotification(
             smallIcon = R.drawable.il_logo_bankmas,
@@ -118,7 +123,6 @@ class ExampleMediaNotificationRepositoryImpl(
         position: Long,
         duration: Long
     ) {
-        println("MASUK_ EXAMPLE AUDIO STATE: $currentAudioState")
         val notification = getMediaNotification(
             context,
             notificationId = notificationId,

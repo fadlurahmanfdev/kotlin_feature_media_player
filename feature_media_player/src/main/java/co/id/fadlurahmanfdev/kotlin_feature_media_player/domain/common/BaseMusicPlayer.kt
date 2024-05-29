@@ -119,8 +119,14 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
         if (exoPlayer.currentPosition > 3000) {
             Log.d(BaseMusicPlayer::class.java.simpleName, "seek to 0 cause current position > 3000")
             exoPlayer.seekTo(0)
+            _position = 0L
+            updateOnStateChanged(MusicPlayerState.SEEK_TO_ZERO)
         } else if (exoPlayer.hasPreviousMediaItem()) {
             Log.d(BaseMusicPlayer::class.java.simpleName, "seek to previous media item")
+            exoPlayer.seekToPreviousMediaItem()
+            _position = 0L
+            _duration = exoPlayer.duration
+            updateOnStateChanged(MusicPlayerState.SEEK_TO_PREVIOUS)
         } else {
             Log.d(
                 BaseMusicPlayer::class.java.simpleName,
@@ -133,6 +139,9 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
         if (exoPlayer.hasNextMediaItem()) {
             Log.d(BaseMusicPlayer::class.java.simpleName, "seek to next media item")
             exoPlayer.seekToNextMediaItem()
+            _position = 0L
+            _duration = exoPlayer.duration
+            updateOnStateChanged(MusicPlayerState.SEEK_TO_NEXT)
         } else {
             Log.d(
                 BaseMusicPlayer::class.java.simpleName,
