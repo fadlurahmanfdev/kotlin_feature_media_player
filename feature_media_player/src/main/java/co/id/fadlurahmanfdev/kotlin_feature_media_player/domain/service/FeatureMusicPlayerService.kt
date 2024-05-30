@@ -16,7 +16,7 @@ import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.common.BaseMusic
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.manager.FeatureMusicPlayerManager
 import java.util.Calendar
 
-abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
+abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Listener {
     private lateinit var musicPlayer: FeatureMusicPlayerManager
     lateinit var mediaNotificationRepository: MediaNotificationRepository
     private var currentNotificationId: Int = -1
@@ -88,7 +88,7 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
 
         musicPlayer = FeatureMusicPlayerManager(applicationContext)
         musicPlayer.initialize()
-        musicPlayer.setCallback(this)
+        musicPlayer.addListener(this)
 
         mediaSession = MediaSessionCompat(this, "FeatureMusicPlayerService")
         Log.d(
@@ -223,6 +223,17 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
                 )
             }
 
+            MusicPlayerState.RESUME -> {
+                onUpdateAudioStateNotification(
+                    notificationId = currentNotificationId,
+                    title = currentTitlePlaying ?: "-",
+                    artist = currentArtistPlaying ?: "-",
+                    position = musicPlayer.position,
+                    duration = musicPlayer.duration,
+                    musicPlayerState = MusicPlayerState.PLAYING
+                )
+            }
+
             MusicPlayerState.SEEK_TO_ZERO -> {
                 onUpdateAudioStateNotification(
                     notificationId = currentNotificationId,
@@ -272,8 +283,6 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
                     state = MusicPlayerState.PAUSED,
                 )
             }
-
-            MusicPlayerState.RESUME -> {}
 
             MusicPlayerState.ENDED -> {
                 onAudioEndedState(notificationId = currentNotificationId)
