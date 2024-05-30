@@ -1,6 +1,7 @@
 package co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository
 
 import android.app.Notification
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationCompat
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.MediaNotificationActionModel
@@ -19,6 +20,7 @@ interface MediaNotificationRepository {
         position: Long,
         duration: Long,
         actions: List<MediaNotificationActionModel>,
+        mediaSession: MediaSessionCompat
     ): Notification
 
     fun showNotification(notificationId: Int, notification: Notification)

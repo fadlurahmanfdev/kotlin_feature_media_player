@@ -2,6 +2,7 @@ package co.id.fadlurahmanfdev.kotlin_feature_media_player.example.data.repositor
 
 import android.app.Notification
 import android.content.Context
+import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.MediaNotificationActionModel
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository.MediaNotificationRepository
@@ -34,6 +35,7 @@ class ExampleMediaNotificationRepositoryImpl(
         artist: String,
         position: Long,
         duration: Long,
+        mediaSession: MediaSessionCompat,
     ): Notification {
         val actions = arrayListOf<MediaNotificationActionModel>().apply {
             if (currentAudioState != AudioNotificationState.IDLE) {
@@ -111,6 +113,7 @@ class ExampleMediaNotificationRepositoryImpl(
             position = position,
             duration = duration,
             actions = actions,
+            mediaSession = mediaSession,
         )
     }
 
@@ -121,7 +124,8 @@ class ExampleMediaNotificationRepositoryImpl(
         title: String,
         artist: String,
         position: Long,
-        duration: Long
+        duration: Long,
+        mediaSession: MediaSessionCompat
     ) {
         val notification = getMediaNotification(
             context,
@@ -130,7 +134,8 @@ class ExampleMediaNotificationRepositoryImpl(
             title = title,
             artist = artist,
             position = position,
-            duration = duration
+            duration = duration,
+            mediaSession = mediaSession
         )
         mediaNotificationRepository.showNotification(
             notificationId = notificationId,

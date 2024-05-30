@@ -22,7 +22,6 @@ class MediaNotificationRepositoryImpl(val context: Context) :
     MediaNotificationRepository {
     private val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    private var mediaSession: MediaSessionCompat? = null
 
     override fun isNotificationChannelExist(channelId: String): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -81,8 +80,8 @@ class MediaNotificationRepositoryImpl(val context: Context) :
         artist: String,
         position: Long,
         duration: Long,
+        mediaSession: MediaSessionCompat,
     ): NotificationCompat.Builder {
-        println("masuk_ audio state: ${currentAudioState}")
         val currentPlaybackState = when (currentAudioState) {
             AudioNotificationState.PLAYING, AudioNotificationState.IDLE -> {
                 PlaybackStateCompat.STATE_PLAYING
@@ -96,10 +95,7 @@ class MediaNotificationRepositoryImpl(val context: Context) :
                 PlaybackStateCompat.STATE_STOPPED
             }
         }
-        if (mediaSession == null) {
-            mediaSession = MediaSessionCompat(context, "MusicPlayerService")
-        }
-        mediaSession?.setPlaybackState(
+        mediaSession.setPlaybackState(
             PlaybackStateCompat.Builder()
                 .setState(currentPlaybackState, position, 1f)
                 .setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SEEK_TO)
@@ -110,8 +106,8 @@ class MediaNotificationRepositoryImpl(val context: Context) :
             putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
             putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
         }.build()
-        mediaSession?.setMetadata(mediaMetaData)
-        mediaSession?.setCallback(object : MediaSessionCompat.Callback() {
+        mediaSession.setMetadata(mediaMetaData)
+        mediaSession.setCallback(object : MediaSessionCompat.Callback() {
             override fun onSeekTo(pos: Long) {
                 super.onSeekTo(pos)
                 Log.d(
@@ -138,6 +134,7 @@ class MediaNotificationRepositoryImpl(val context: Context) :
         position: Long,
         duration: Long,
         actions: List<MediaNotificationActionModel>,
+        mediaSession: MediaSessionCompat,
     ): Notification {
         val notification = getMediaNotificationBuilder(
             smallIcon = smallIcon,
@@ -147,6 +144,7 @@ class MediaNotificationRepositoryImpl(val context: Context) :
             artist = artist,
             position = position,
             duration = duration,
+            mediaSession = mediaSession
         ).apply {
 
             repeat(actions.size) { index ->
