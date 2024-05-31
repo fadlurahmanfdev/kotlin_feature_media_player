@@ -46,7 +46,7 @@ class ExampleMusicPlayerService : FeatureMusicPlayerService() {
     ) {
         if (mediaSession != null) {
             when (musicPlayerState) {
-                MusicPlayerState.PLAYING -> {
+                MusicPlayerState.PLAYING, MusicPlayerState.RESUME -> {
                     exampleMediaNotificationRepository.updateMediaNotification(
                         applicationContext,
                         notificationId = notificationId,
