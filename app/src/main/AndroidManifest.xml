@@ -37,6 +37,8 @@
                 <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_RESUME_AUDIO" />
                 <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PREVIOUS_AUDIO" />
                 <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_NEXT_AUDIO" />
+                <action android:name="co.id.fadlurahmanfdev.feature_media_player.ACTION_SEEK_TO_POSITION" />
+                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.SEND_INFO" />
             </intent-filter>
         </receiver>
         <service
@@ -48,6 +50,7 @@
                 <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_RESUME_AUDIO" />
                 <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PREVIOUS_AUDIO" />
                 <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_NEXT_AUDIO" />
+                <action android:name="co.id.fadlurahmanfdev.feature_media_player.ACTION_SEEK_TO_POSITION" />
                 <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.SEND_INFO" />
             </intent-filter>
         </service>

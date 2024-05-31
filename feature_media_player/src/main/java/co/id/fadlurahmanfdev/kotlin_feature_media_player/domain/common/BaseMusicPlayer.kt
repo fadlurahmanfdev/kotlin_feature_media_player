@@ -148,6 +148,10 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
      */
     fun seekToPosition(position: Long) {
         exoPlayer.seekTo(position)
+        _position = position
+        updateOnStateChanged(MusicPlayerState.SEEK_TO_SPECIFIC_POSITION)
+        updateOnStateChanged(MusicPlayerState.RESUME)
+        updateOnStateChanged(MusicPlayerState.PLAYING)
     }
 
     private val handler = Handler(Looper.getMainLooper())

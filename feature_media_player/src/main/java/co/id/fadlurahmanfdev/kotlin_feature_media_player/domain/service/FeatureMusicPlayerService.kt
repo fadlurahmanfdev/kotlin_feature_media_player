@@ -37,12 +37,15 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Listener {
             "co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PREVIOUS_AUDIO"
         const val ACTION_NEXT_AUDIO =
             "co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_NEXT_AUDIO"
+        const val ACTION_SEEK_TO_POSITION =
+            "co.id.fadlurahmanfdev.feature_media_player.ACTION_SEEK_TO_POSITION"
+
+        // not used yet
         const val ACTION_REWIND_AUDIO =
             "co.id.fadlurahmanfdev.feature_media_player.ACTION_REWIND_AUDIO"
         const val ACTION_FORWARD_AUDIO =
             "co.id.fadlurahmanfdev.feature_media_player.ACTION_FORWARD_AUDIO"
-        const val ACTION_SEEK_TO_POSITION =
-            "co.id.fadlurahmanfdev.feature_media_player.ACTION_SEEK_TO_POSITION"
+
         const val SEND_INFO =
             "co.id.fadlurahmanfdev.kotlin_feature_media_player.SEND_INFO"
 
@@ -174,15 +177,24 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Listener {
                 }
             }
 
-
             ACTION_SEEK_TO_POSITION -> {
-//                val seekToPosition = intent.getLongExtra(PARAM_SEEK_TO_POSITION, -1L)
-//                if (seekToPosition != -1L) {
-//                    musicPlayer.seekToPosition(seekToPosition)
-//                }
+                val position = intent.getLongExtra(PARAM_SEEK_TO_POSITION, -1L)
+                if (position != -1L) {
+                    onSeekToPosition(position)
+                } else {
+                    Log.e(
+                        FeatureMusicPlayerService::class.java.simpleName,
+                        "$action -> notificationId missing"
+                    )
+                }
             }
         }
         return START_STICKY
+    }
+
+    @UnstableApi
+    open fun onSeekToPosition(position: Long) {
+        musicPlayer.seekToPosition(position = position)
     }
 
     @OptIn(UnstableApi::class)

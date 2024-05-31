@@ -42,6 +42,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    api("com.github.fadlurahmanfdev:kotlin_core_notification:v0.0.16")
+
     val media3_version = "1.3.1"
     api("androidx.media3:media3-exoplayer:$media3_version")
     api("androidx.media3:media3-ui:$media3_version")

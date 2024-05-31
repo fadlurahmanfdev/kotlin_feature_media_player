@@ -3,15 +3,14 @@ package co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository
 import android.app.Notification
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.annotation.DrawableRes
-import androidx.core.app.NotificationCompat
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.MediaNotificationActionModel
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.AudioNotificationState
 
 interface MediaNotificationRepository {
     fun isNotificationChannelExist(channelId: String): Boolean
-    fun createChannel(channelId: String, channelName: String, channelDescription: String)
-    fun isNotificationPermissionGranted(): Boolean
-    fun getNotification(
+    fun createMediaChannel(channelId: String, channelName: String, channelDescription: String)
+    fun isNotificationPermissionEnabledAndGranted(): Boolean
+    fun getMediaNotification(
         @DrawableRes smallIcon: Int,
         channelId: String,
         currentAudioState: AudioNotificationState,
@@ -19,6 +18,7 @@ interface MediaNotificationRepository {
         artist: String,
         position: Long,
         duration: Long,
+        onSeekToPosition: (Long) -> Unit,
         actions: List<MediaNotificationActionModel>,
         mediaSession: MediaSessionCompat
     ): Notification

@@ -15,7 +15,7 @@ class ExampleMediaNotificationRepositoryImpl(
     private val mediaNotificationRepository: MediaNotificationRepository
 ) : ExampleMediaNotificationRepository {
     override fun createMediaNotificationChannel() {
-        mediaNotificationRepository.createChannel(
+        mediaNotificationRepository.createMediaChannel(
             channelId = "MEDIA",
             channelName = "Media",
             channelDescription = "Notifikasi media"
@@ -104,7 +104,7 @@ class ExampleMediaNotificationRepositoryImpl(
                 )
             }
         }
-        return mediaNotificationRepository.getNotification(
+        return mediaNotificationRepository.getMediaNotification(
             smallIcon = R.drawable.il_logo_bankmas,
             channelId = "MEDIA",
             currentAudioState = currentAudioState,
@@ -113,6 +113,13 @@ class ExampleMediaNotificationRepositoryImpl(
             position = position,
             duration = duration,
             actions = actions,
+            onSeekToPosition = { positionSeekTo ->
+                FeatureMusicPlayerManager.sendBroadcastSeekToPosition(
+                    context,
+                    position = positionSeekTo,
+                    clazz = ExampleMusicPlayerReceiver::class.java,
+                )
+            },
             mediaSession = mediaSession,
         )
     }
