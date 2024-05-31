@@ -1,15 +1,11 @@
 package co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.manager
 
-import android.app.Activity
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.common.BaseMusicPlayer
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.receiver.FeatureMusicPlayerReceiver
@@ -130,7 +126,7 @@ class FeatureMusicPlayerManager(override val context: Context) : BaseMusicPlayer
             }
             return PendingIntent.getBroadcast(
                 context,
-                0,
+                2,
                 intent,
                 getFlagPendingIntent()
             )
@@ -148,10 +144,23 @@ class FeatureMusicPlayerManager(override val context: Context) : BaseMusicPlayer
             }
             return PendingIntent.getBroadcast(
                 context,
-                0,
+                3,
                 intent,
                 getFlagPendingIntent()
             )
+        }
+
+        fun <T : FeatureMusicPlayerReceiver> sendBroadcastSeekToPosition(
+            context: Context,
+            position: Long,
+            clazz: Class<T>
+        ) {
+            val intent = Intent(context, clazz)
+            intent.apply {
+                action = FeatureMusicPlayerReceiver.ACTION_SEEK_TO_POSITION
+                putExtra(FeatureMusicPlayerReceiver.PARAM_SEEK_TO_POSITION, position)
+            }
+            context.sendBroadcast(intent)
         }
 
         fun <T : FeatureMusicPlayerService> seekToPosition(

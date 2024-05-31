@@ -1,75 +1,31 @@
-package co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository
+package co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.common
 
-import android.Manifest
 import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.MediaNotificationActionModel
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.AudioNotificationState
+import com.github.fadlurahmanfdev.kotlin_core_notification.others.BaseNotificationService
 
-class MediaNotificationRepositoryImpl(val context: Context) :
-    MediaNotificationRepository {
-    private val notificationManager: NotificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-    override fun isNotificationChannelExist(channelId: String): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val allChannels = notificationManager.notificationChannels
-            var knownChannel: NotificationChannel? = null
-            for (element in allChannels) {
-                if (element.id == channelId) {
-                    knownChannel = element
-                    break
-                }
-            }
-            return knownChannel != null
-        }
-        return false
-    }
-
+abstract class BaseMediaNotificationService(context: Context) : BaseNotificationService(context) {
     /**
-     * what ever channel created using this func, will get no sound
+     * create media channel with no sound
      * */
-    override fun createChannel(channelId: String, channelName: String, channelDescription: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!isNotificationChannelExist(channelId = channelId)) {
-                val channel = NotificationChannel(
-                    channelId,
-                    channelName,
-                    NotificationManager.IMPORTANCE_HIGH
-                ).apply {
-                    description = channelDescription
-                    setSound(null, null)
-                }
-                notificationManager.createNotificationChannel(channel)
-            }
-        }
-    }
-
-    override fun isNotificationPermissionGranted(): Boolean {
-        return when {
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU -> {
-                NotificationManagerCompat.from(context).areNotificationsEnabled()
-            }
-
-            else -> {
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission_group.NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-            }
-        }
+    open fun createMediaChannel(
+        channelId: String,
+        channelName: String,
+        channelDescription: String
+    ) {
+        super.createNotificationChannel(
+            channelId = channelId,
+            channelName = channelName,
+            channelDescription = channelDescription,
+            sound = null,
+        )
     }
 
     private fun getMediaNotificationBuilder(
@@ -80,6 +36,7 @@ class MediaNotificationRepositoryImpl(val context: Context) :
         artist: String,
         position: Long,
         duration: Long,
+        onSeekToPosition: (Long) -> Unit,
         mediaSession: MediaSessionCompat,
     ): NotificationCompat.Builder {
         val currentPlaybackState = when (currentAudioState) {
@@ -110,22 +67,17 @@ class MediaNotificationRepositoryImpl(val context: Context) :
         mediaSession.setCallback(object : MediaSessionCompat.Callback() {
             override fun onSeekTo(pos: Long) {
                 super.onSeekTo(pos)
-                Log.d(
-                    MediaNotificationRepositoryImpl::class.java.simpleName,
-                    "audio seek to: $pos"
-                )
+                onSeekToPosition(pos)
             }
         })
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
-        if (mediaSession != null) {
-            mediaStyle.setMediaSession(mediaSession!!.sessionToken)
-        }
+        mediaStyle.setMediaSession(mediaSession.sessionToken)
         mediaStyle.setShowActionsInCompactView(0, 1, 2)
         return NotificationCompat.Builder(context, channelId).setSmallIcon(smallIcon)
             .setStyle(mediaStyle)
     }
 
-    override fun getNotification(
+    open fun getMediaNotification(
         @DrawableRes smallIcon: Int,
         channelId: String,
         currentAudioState: AudioNotificationState,
@@ -133,6 +85,7 @@ class MediaNotificationRepositoryImpl(val context: Context) :
         artist: String,
         position: Long,
         duration: Long,
+        onSeekToPosition: (Long) -> Unit,
         actions: List<MediaNotificationActionModel>,
         mediaSession: MediaSessionCompat,
     ): Notification {
@@ -144,9 +97,9 @@ class MediaNotificationRepositoryImpl(val context: Context) :
             artist = artist,
             position = position,
             duration = duration,
+            onSeekToPosition = onSeekToPosition,
             mediaSession = mediaSession
         ).apply {
-
             repeat(actions.size) { index ->
                 addAction(
                     NotificationCompat.Action(
@@ -163,12 +116,4 @@ class MediaNotificationRepositoryImpl(val context: Context) :
             }
         }.build()
     }
-
-    override fun showNotification(notificationId: Int, notification: Notification) {
-        return notificationManager.notify(
-            notificationId,
-            notification,
-        )
-    }
-
 }

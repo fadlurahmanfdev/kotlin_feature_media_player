@@ -9,16 +9,13 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
-import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository.MediaNotificationRepository
-import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository.MediaNotificationRepositoryImpl
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.MusicPlayerState
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.common.BaseMusicPlayer
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.manager.FeatureMusicPlayerManager
 import java.util.Calendar
 
-abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
+abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Listener {
     private lateinit var musicPlayer: FeatureMusicPlayerManager
-    lateinit var mediaNotificationRepository: MediaNotificationRepository
     private var currentNotificationId: Int = -1
     private lateinit var audioUrls: List<String>
     private lateinit var currentAudioUrlPlaying: String
@@ -37,12 +34,15 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
             "co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PREVIOUS_AUDIO"
         const val ACTION_NEXT_AUDIO =
             "co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_NEXT_AUDIO"
+        const val ACTION_SEEK_TO_POSITION =
+            "co.id.fadlurahmanfdev.feature_media_player.ACTION_SEEK_TO_POSITION"
+
+        // not used yet
         const val ACTION_REWIND_AUDIO =
             "co.id.fadlurahmanfdev.feature_media_player.ACTION_REWIND_AUDIO"
         const val ACTION_FORWARD_AUDIO =
             "co.id.fadlurahmanfdev.feature_media_player.ACTION_FORWARD_AUDIO"
-        const val ACTION_SEEK_TO_POSITION =
-            "co.id.fadlurahmanfdev.feature_media_player.ACTION_SEEK_TO_POSITION"
+
         const val SEND_INFO =
             "co.id.fadlurahmanfdev.kotlin_feature_media_player.SEND_INFO"
 
@@ -84,11 +84,10 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
             FeatureMusicPlayerService::class.java.simpleName,
             "init on create ${FeatureMusicPlayerService::class.java.simpleName}"
         )
-        mediaNotificationRepository = MediaNotificationRepositoryImpl(applicationContext)
 
         musicPlayer = FeatureMusicPlayerManager(applicationContext)
         musicPlayer.initialize()
-        musicPlayer.setCallback(this)
+        musicPlayer.addListener(this)
 
         mediaSession = MediaSessionCompat(this, "FeatureMusicPlayerService")
         Log.d(
@@ -174,15 +173,24 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
                 }
             }
 
-
             ACTION_SEEK_TO_POSITION -> {
-//                val seekToPosition = intent.getLongExtra(PARAM_SEEK_TO_POSITION, -1L)
-//                if (seekToPosition != -1L) {
-//                    musicPlayer.seekToPosition(seekToPosition)
-//                }
+                val position = intent.getLongExtra(PARAM_SEEK_TO_POSITION, -1L)
+                if (position != -1L) {
+                    onSeekToPosition(position)
+                } else {
+                    Log.e(
+                        FeatureMusicPlayerService::class.java.simpleName,
+                        "$action -> notificationId missing"
+                    )
+                }
             }
         }
         return START_STICKY
+    }
+
+    @UnstableApi
+    open fun onSeekToPosition(position: Long) {
+        musicPlayer.seekToPosition(position = position)
     }
 
     @OptIn(UnstableApi::class)
@@ -213,6 +221,17 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
             }
 
             MusicPlayerState.PLAYING -> {
+                onUpdateAudioStateNotification(
+                    notificationId = currentNotificationId,
+                    title = currentTitlePlaying ?: "-",
+                    artist = currentArtistPlaying ?: "-",
+                    position = musicPlayer.position,
+                    duration = musicPlayer.duration,
+                    musicPlayerState = MusicPlayerState.PLAYING
+                )
+            }
+
+            MusicPlayerState.RESUME -> {
                 onUpdateAudioStateNotification(
                     notificationId = currentNotificationId,
                     title = currentTitlePlaying ?: "-",
@@ -272,8 +291,6 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Callback {
                     state = MusicPlayerState.PAUSED,
                 )
             }
-
-            MusicPlayerState.RESUME -> {}
 
             MusicPlayerState.ENDED -> {
                 onAudioEndedState(notificationId = currentNotificationId)

@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.RecyclerView
-import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository.MediaNotificationRepositoryImpl
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.example.R
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.example.data.dto.model.FeatureModel
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.example.data.repository.ExampleMediaNotificationRepositoryImpl
@@ -49,7 +48,7 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
         viewModel = MainViewModel(
             exampleMediaPlayerUseCase = ExampleMediaPlayerUseCaseImpl(
                 exampleMediaNotificationRepository = ExampleMediaNotificationRepositoryImpl(
-                    mediaNotificationRepository = MediaNotificationRepositoryImpl(this)
+                    this
                 )
             )
         )

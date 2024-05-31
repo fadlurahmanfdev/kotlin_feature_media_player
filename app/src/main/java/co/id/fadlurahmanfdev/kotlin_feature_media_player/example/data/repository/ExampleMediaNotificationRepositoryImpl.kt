@@ -3,27 +3,20 @@ package co.id.fadlurahmanfdev.kotlin_feature_media_player.example.data.repositor
 import android.app.Notification
 import android.content.Context
 import android.support.v4.media.session.MediaSessionCompat
-import android.util.Log
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.MediaNotificationActionModel
-import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository.MediaNotificationRepository
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.AudioNotificationState
+import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.common.BaseMediaNotificationService
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.manager.FeatureMusicPlayerManager
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.example.R
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.example.domain.receiver.ExampleMusicPlayerReceiver
 
-class ExampleMediaNotificationRepositoryImpl(
-    private val mediaNotificationRepository: MediaNotificationRepository
-) : ExampleMediaNotificationRepository {
+class ExampleMediaNotificationRepositoryImpl(context: Context) :
+    BaseMediaNotificationService(context), ExampleMediaNotificationRepository {
     override fun createMediaNotificationChannel() {
-        mediaNotificationRepository.createChannel(
+        super.createMediaChannel(
             channelId = "MEDIA",
             channelName = "Media",
-            channelDescription = "Notifikasi media"
-        )
-        val channelIsExist = mediaNotificationRepository.isNotificationChannelExist("MEDIA")
-        Log.d(
-            ExampleMediaNotificationRepositoryImpl::class.java.simpleName,
-            "is channel exist: $channelIsExist"
+            channelDescription = "Notifikasi Media",
         )
     }
 
@@ -104,7 +97,7 @@ class ExampleMediaNotificationRepositoryImpl(
                 )
             }
         }
-        return mediaNotificationRepository.getNotification(
+        return getMediaNotification(
             smallIcon = R.drawable.il_logo_bankmas,
             channelId = "MEDIA",
             currentAudioState = currentAudioState,
@@ -113,6 +106,13 @@ class ExampleMediaNotificationRepositoryImpl(
             position = position,
             duration = duration,
             actions = actions,
+            onSeekToPosition = { positionSeekTo ->
+                FeatureMusicPlayerManager.sendBroadcastSeekToPosition(
+                    context,
+                    position = positionSeekTo,
+                    clazz = ExampleMusicPlayerReceiver::class.java,
+                )
+            },
             mediaSession = mediaSession,
         )
     }
@@ -137,7 +137,7 @@ class ExampleMediaNotificationRepositoryImpl(
             duration = duration,
             mediaSession = mediaSession
         )
-        mediaNotificationRepository.showNotification(
+        showNotification(
             notificationId = notificationId,
             notification = notification,
         )

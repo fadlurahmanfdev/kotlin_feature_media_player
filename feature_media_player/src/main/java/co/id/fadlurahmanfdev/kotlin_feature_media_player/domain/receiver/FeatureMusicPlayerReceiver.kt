@@ -13,9 +13,11 @@ abstract class FeatureMusicPlayerReceiver : BroadcastReceiver() {
         const val ACTION_RESUME_AUDIO = FeatureMusicPlayerService.ACTION_RESUME_AUDIO
         const val ACTION_PREVIOUS_AUDIO = FeatureMusicPlayerService.ACTION_PREVIOUS_AUDIO
         const val ACTION_NEXT_AUDIO = FeatureMusicPlayerService.ACTION_NEXT_AUDIO
+        const val ACTION_SEEK_TO_POSITION = FeatureMusicPlayerService.ACTION_SEEK_TO_POSITION
         const val SEND_INFO = FeatureMusicPlayerService.SEND_INFO
 
         const val PARAM_NOTIFICATION_ID = FeatureMusicPlayerService.PARAM_NOTIFICATION_ID
+        const val PARAM_SEEK_TO_POSITION = FeatureMusicPlayerService.PARAM_SEEK_TO_POSITION
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -77,6 +79,18 @@ abstract class FeatureMusicPlayerReceiver : BroadcastReceiver() {
                     )
                 }
             }
+
+            ACTION_SEEK_TO_POSITION -> {
+                val position = intent.getLongExtra(PARAM_SEEK_TO_POSITION, -1L)
+                if (position != -1L) {
+                    onSeekToPosition(context, position = position)
+                } else {
+                    Log.e(
+                        FeatureMusicPlayerReceiver::class.java.simpleName,
+                        "$action -> notificationId is missing"
+                    )
+                }
+            }
         }
     }
 
@@ -84,4 +98,5 @@ abstract class FeatureMusicPlayerReceiver : BroadcastReceiver() {
     abstract fun onResumeAudio(context: Context)
     abstract fun onPreviousAudio(context: Context)
     abstract fun onNextAudio(context: Context)
+    abstract fun onSeekToPosition(context: Context, position: Long)
 }

@@ -23,7 +23,7 @@ import co.id.fadlurahmanfdev.kotlin_feature_media_player.others.utilities.CacheU
 @UnstableApi
 abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, AnalyticsListener {
     private lateinit var exoPlayer: ExoPlayer
-    private var callback: Callback? = null
+    private var listener: Listener? = null
     private var _duration: Long = 0L
     val duration: Long
         get() = _duration
@@ -34,8 +34,8 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
     val musicPlayerState: MusicPlayerState
         get() = _musicPlayerState
 
-    fun setCallback(callback: Callback) {
-        this.callback = callback
+    fun addListener(listener: Listener) {
+        this.listener = listener
     }
 
     open fun initialize() {
@@ -64,25 +64,19 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
     }
 
-    fun playRemoteAudio(uriString: String) {
-        val dataSourceFactory: DataSource.Factory = createHttpDatasourceFactory()
-        val mediaItem = MediaItem.fromUri(Uri.parse(uriString))
-        val cacheDataSourceFactory = createCacheDatasourceFactory(dataSourceFactory)
-        val mediaSource: MediaSource =
-            ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-                .createMediaSource(mediaItem)
-        exoPlayer.setMediaSource(mediaSource)
-        updateOnStateChanged(MusicPlayerState.IDLE)
-        exoPlayer.playWhenReady = true
-        exoPlayer.prepare()
-    }
-
     fun playRemoteAudio(listUriString: List<String>) {
         val dataSourceFactory: DataSource.Factory = createHttpDatasourceFactory()
         val mediaItems = arrayListOf<MediaItem>()
         repeat(listUriString.size) { index ->
-            val mediaItem = MediaItem.fromUri(Uri.parse(listUriString[index]))
-            mediaItems.add(mediaItem)
+            try {
+                val mediaItem = MediaItem.fromUri(Uri.parse(listUriString[index]))
+                mediaItems.add(mediaItem)
+            } catch (t: Throwable) {
+                Log.e(
+                    BaseMusicPlayer::class.java.simpleName,
+                    "error get media item from uri for ${listUriString[index]} caused by ${t.message}"
+                )
+            }
         }
         val cacheDataSourceFactory = createCacheDatasourceFactory(dataSourceFactory)
         val mediaSources = arrayListOf<MediaSource>()
@@ -93,14 +87,13 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
             mediaSources.add(mediaSource)
         }
         exoPlayer.setMediaSources(mediaSources)
-        updateOnStateChanged(MusicPlayerState.IDLE)
         exoPlayer.playWhenReady = true
         exoPlayer.prepare()
     }
 
     fun pause() {
         if (musicPlayerState == MusicPlayerState.PLAYING) {
-            handler.removeCallbacks(fetchDurationAndPositionRunnable)
+            handler.removeCallbacks(audioPositionRunnable)
             exoPlayer.pause()
             updateOnStateChanged(MusicPlayerState.PAUSED)
         }
@@ -108,10 +101,10 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
 
     fun resume() {
         if (musicPlayerState == MusicPlayerState.PAUSED) {
-            handler.post(fetchDurationAndPositionRunnable)
             exoPlayer.play()
             updateOnStateChanged(MusicPlayerState.RESUME)
-            handler.postDelayed({ updateOnStateChanged(MusicPlayerState.PLAYING) }, 500)
+            updateOnStateChanged(MusicPlayerState.PLAYING)
+            handler.postDelayed(audioPositionRunnable, 500)
         }
     }
 
@@ -155,28 +148,32 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
      */
     fun seekToPosition(position: Long) {
         exoPlayer.seekTo(position)
+        _position = position
+        updateOnStateChanged(MusicPlayerState.SEEK_TO_SPECIFIC_POSITION)
+        updateOnStateChanged(MusicPlayerState.RESUME)
+        updateOnStateChanged(MusicPlayerState.PLAYING)
     }
 
     private val handler = Handler(Looper.getMainLooper())
-    private val fetchDurationAndPositionRunnable = object : Runnable {
+    private val audioPositionRunnable = object : Runnable {
         override fun run() {
             if (exoPlayer.currentPosition > 0 && position != exoPlayer.currentPosition) {
                 _position = exoPlayer.currentPosition
-                callback?.onPositionChanged(position)
+                listener?.onPositionChanged(position)
             }
 
             handler.postDelayed(this, 250)
         }
     }
 
-    override fun onIsLoadingChanged(isLoading: Boolean) {
-        super<Player.Listener>.onIsLoadingChanged(isLoading)
-        Log.d(BaseMusicPlayer::class.java.simpleName, "IS LOADING -> $isLoading")
-    }
+//    override fun onIsLoadingChanged(isLoading: Boolean) {
+//        super<Player.Listener>.onIsLoadingChanged(isLoading)
+//        Log.d(BaseMusicPlayer::class.java.simpleName, "onIsLoadingChanged -> $isLoading")
+//    }
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         super<Player.Listener>.onIsPlayingChanged(isPlaying)
-        Log.d(BaseMusicPlayer::class.java.simpleName, "IS PLAYING -> $isPlaying")
+        Log.d(BaseMusicPlayer::class.java.simpleName, "onIsPlayingChanged -> $isPlaying")
         if (isPlaying && musicPlayerState != MusicPlayerState.PLAYING) {
             updateOnStateChanged(MusicPlayerState.PLAYING)
         }
@@ -184,18 +181,18 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
 
     override fun onPlaybackStateChanged(eventTime: AnalyticsListener.EventTime, state: Int) {
         super<AnalyticsListener>.onPlaybackStateChanged(eventTime, state)
-        Log.d(BaseMusicPlayer::class.java.simpleName, "PLAYBACK STATE -> $state")
+        Log.d(BaseMusicPlayer::class.java.simpleName, "onPlaybackStateChanged -> $state")
         if (state == Player.STATE_IDLE && musicPlayerState != MusicPlayerState.IDLE) {
             updateOnStateChanged(MusicPlayerState.IDLE)
-        } else if (state == Player.STATE_BUFFERING && musicPlayerState != MusicPlayerState.LOADING) {
-            updateOnStateChanged(MusicPlayerState.LOADING)
+        } else if (state == Player.STATE_BUFFERING && musicPlayerState != MusicPlayerState.BUFFERING) {
+            updateOnStateChanged(MusicPlayerState.BUFFERING)
         } else if (state == Player.STATE_READY && musicPlayerState != MusicPlayerState.READY) {
             _duration = exoPlayer.duration
-            callback?.onDurationFetched(duration)
-            handler.post(fetchDurationAndPositionRunnable)
+            listener?.onDurationFetched(duration)
+            handler.post(audioPositionRunnable)
             updateOnStateChanged(MusicPlayerState.READY)
         } else if (state == Player.STATE_ENDED && musicPlayerState != MusicPlayerState.ENDED) {
-            handler.removeCallbacks(fetchDurationAndPositionRunnable)
+            handler.removeCallbacks(audioPositionRunnable)
             updateOnStateChanged(MusicPlayerState.ENDED)
         }
     }
@@ -203,17 +200,17 @@ abstract class BaseMusicPlayer(open val context: Context) : Player.Listener, Ana
     private fun updateOnStateChanged(state: MusicPlayerState) {
         Log.d(BaseMusicPlayer::class.java.simpleName, "current music state: $state")
         _musicPlayerState = state
-        callback?.onStateChanged(state)
+        listener?.onStateChanged(state)
     }
 
     fun destroy() {
-        handler.removeCallbacks(fetchDurationAndPositionRunnable)
+        handler.removeCallbacks(audioPositionRunnable)
         exoPlayer.pause()
         exoPlayer.stop()
         exoPlayer.release()
     }
 
-    interface Callback {
+    interface Listener {
         fun onStateChanged(state: MusicPlayerState) {}
         fun onDurationFetched(duration: Long) {}
         fun onPositionChanged(position: Long) {}
