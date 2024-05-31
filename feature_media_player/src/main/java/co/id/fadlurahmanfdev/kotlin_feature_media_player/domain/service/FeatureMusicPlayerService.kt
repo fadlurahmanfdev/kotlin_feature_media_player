@@ -211,6 +211,12 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Listener {
             FeatureMusicPlayerService::class.java.simpleName,
             "${FeatureMusicPlayerService::class.java.simpleName} onStateChanged: $state"
         )
+        sendBroadcastSendInfo(
+            applicationContext,
+            position = musicPlayer.position,
+            duration = musicPlayer.duration,
+            state = musicPlayer.musicPlayerState,
+        )
         when (state) {
             MusicPlayerState.IDLE -> {
 
