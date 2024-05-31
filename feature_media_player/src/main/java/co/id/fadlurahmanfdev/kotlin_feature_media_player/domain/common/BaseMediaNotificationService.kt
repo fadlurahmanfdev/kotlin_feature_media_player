@@ -1,4 +1,4 @@
-package co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository
+package co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.common
 
 import android.app.Notification
 import android.content.Context
@@ -11,16 +11,11 @@ import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.MediaNotificationA
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.AudioNotificationState
 import com.github.fadlurahmanfdev.kotlin_core_notification.others.BaseNotificationService
 
-class MediaNotificationRepositoryImpl(context: Context) : BaseNotificationService(context),
-    MediaNotificationRepository {
-    override fun isNotificationChannelExist(channelId: String): Boolean {
-        return super.isNotificationChannelExist(channelId)
-    }
-
+abstract class BaseMediaNotificationService(context: Context) : BaseNotificationService(context) {
     /**
      * create media channel with no sound
      * */
-    override fun createMediaChannel(
+    open fun createMediaChannel(
         channelId: String,
         channelName: String,
         channelDescription: String
@@ -31,10 +26,6 @@ class MediaNotificationRepositoryImpl(context: Context) : BaseNotificationServic
             channelDescription = channelDescription,
             sound = null,
         )
-    }
-
-    override fun isNotificationPermissionEnabledAndGranted(): Boolean {
-        return super.isNotificationPermissionEnabledAndGranted()
     }
 
     private fun getMediaNotificationBuilder(
@@ -86,7 +77,7 @@ class MediaNotificationRepositoryImpl(context: Context) : BaseNotificationServic
             .setStyle(mediaStyle)
     }
 
-    override fun getMediaNotification(
+    open fun getMediaNotification(
         @DrawableRes smallIcon: Int,
         channelId: String,
         currentAudioState: AudioNotificationState,
@@ -125,9 +116,4 @@ class MediaNotificationRepositoryImpl(context: Context) : BaseNotificationServic
             }
         }.build()
     }
-
-    override fun showNotification(notificationId: Int, notification: Notification) {
-        return super.showNotification(notificationId, notification)
-    }
-
 }

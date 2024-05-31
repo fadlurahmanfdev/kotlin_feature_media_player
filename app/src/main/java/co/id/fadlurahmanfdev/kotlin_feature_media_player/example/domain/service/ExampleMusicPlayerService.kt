@@ -15,9 +15,7 @@ class ExampleMusicPlayerService : FeatureMusicPlayerService() {
     @UnstableApi
     override fun onCreate() {
         super.onCreate()
-        exampleMediaNotificationRepository = ExampleMediaNotificationRepositoryImpl(
-            mediaNotificationRepository = mediaNotificationRepository,
-        )
+        exampleMediaNotificationRepository = ExampleMediaNotificationRepositoryImpl(applicationContext)
     }
 
     override fun onIdleAudioNotification(

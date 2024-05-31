@@ -9,8 +9,6 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
-import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository.MediaNotificationRepository
-import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.repository.MediaNotificationRepositoryImpl
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.data.state.MusicPlayerState
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.common.BaseMusicPlayer
 import co.id.fadlurahmanfdev.kotlin_feature_media_player.domain.manager.FeatureMusicPlayerManager
@@ -18,7 +16,6 @@ import java.util.Calendar
 
 abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Listener {
     private lateinit var musicPlayer: FeatureMusicPlayerManager
-    lateinit var mediaNotificationRepository: MediaNotificationRepository
     private var currentNotificationId: Int = -1
     private lateinit var audioUrls: List<String>
     private lateinit var currentAudioUrlPlaying: String
@@ -87,7 +84,6 @@ abstract class FeatureMusicPlayerService : Service(), BaseMusicPlayer.Listener {
             FeatureMusicPlayerService::class.java.simpleName,
             "init on create ${FeatureMusicPlayerService::class.java.simpleName}"
         )
-        mediaNotificationRepository = MediaNotificationRepositoryImpl(applicationContext)
 
         musicPlayer = FeatureMusicPlayerManager(applicationContext)
         musicPlayer.initialize()
