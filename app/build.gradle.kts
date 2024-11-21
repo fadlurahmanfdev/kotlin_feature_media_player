@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "co.id.fadlurahmanfdev.kotlin_feature_media_player.example"
+    namespace = "com.fadlurahmanfdev.example"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "co.id.fadlurahmanfdev.kotlin_feature_media_player.example"
+        applicationId = "com.fadlurahmanfdev.example"
         minSdk = 21
         targetSdk = 34
         versionCode = 1

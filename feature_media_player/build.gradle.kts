@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "co.id.fadlurahmanfdev.kotlin_feature_media_player"
+    namespace = "com.fadlurahmanfdev.kotlin_feature_media_player"
     compileSdk = 34
 
     defaultConfig {
