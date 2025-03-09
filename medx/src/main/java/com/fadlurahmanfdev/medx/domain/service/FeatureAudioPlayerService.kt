@@ -13,6 +13,7 @@ import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
+import com.fadlurahmanfdev.medx.MedxAudioPlayer
 import com.fadlurahmanfdev.medx.data.constant.FeatureAudioPlayerConstant
 import com.fadlurahmanfdev.medx.data.constant.FeatureMediaPlayerErrorConstant
 import com.fadlurahmanfdev.medx.data.dto.model.MediaStateModel
@@ -20,12 +21,11 @@ import com.fadlurahmanfdev.medx.data.enums.AudioPlayerEvent
 import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
 import com.fadlurahmanfdev.medx.data.exception.FeatureMediaPlayerException
 import com.fadlurahmanfdev.medx.domain.common.BaseAudioPlayer
-import com.fadlurahmanfdev.medx.domain.player.FeatureAudioPlayer
 import java.util.Calendar
 
 @UnstableApi
 abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
-    private lateinit var audioPlayer: FeatureAudioPlayer
+    private lateinit var medxAudioPlayer: MedxAudioPlayer
 
     private var notificationId: Int = -1
     private lateinit var mediaItems: List<MediaItem>
@@ -81,9 +81,9 @@ abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
     override fun onCreate() {
         super.onCreate()
         Log.d(this::class.java.simpleName, "initialize audio player")
-        audioPlayer = FeatureAudioPlayer(applicationContext)
-        audioPlayer.initialize()
-        audioPlayer.addListener(this)
+        medxAudioPlayer = MedxAudioPlayer(applicationContext)
+        medxAudioPlayer.initialize()
+        medxAudioPlayer.addListener(this)
         Log.d(this::class.java.simpleName, "successfully initialize audio player")
 
         mediaSession = MediaSessionCompat(this, "FeatureAudioPlayerService")
@@ -200,7 +200,7 @@ abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
         // Set media item want to be played
         mediaItemCurrentlyPlaying = mediaItems.first()
 
-        audioPlayer.playRemoteAudio(mediaItems)
+        medxAudioPlayer.playRemoteAudio(mediaItems)
 
         if (mediaSession == null) {
             mediaSession = MediaSessionCompat(this, "FeatureAudioPlayerService")
@@ -218,29 +218,29 @@ abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
     }
 
     private fun onStartCommandPauseAudio(intent: Intent) {
-        audioPlayer.pause()
+        medxAudioPlayer.pause()
         onPauseAudio(intent)
     }
 
     private fun onStartCommandResumeAudio(intent: Intent) {
-        audioPlayer.resume()
+        medxAudioPlayer.resume()
         onResumeAudio(intent)
     }
 
     private fun onStartCommandPreviousAudio(intent: Intent) {
-        audioPlayer.seekToPrevious()
+        medxAudioPlayer.seekToPrevious()
         onSkipToPreviousAudio(intent)
     }
 
     private fun onStartCommandNextAudio(intent: Intent) {
-        audioPlayer.seekToNext()
+        medxAudioPlayer.seekToNext()
         onSkipToNextAudio(intent)
     }
 
     private fun onStartCommandSeekToPosition(intent: Intent) {
         val position = intent.getLongExtra(FeatureAudioPlayerConstant.PARAM_SEEK_TO_POSITION, -1L)
         if (position != -1L) {
-            audioPlayer.seekToPosition(position = position)
+            medxAudioPlayer.seekToPosition(position = position)
             onSeekToPosition(position)
         } else {
             Log.e(
@@ -277,8 +277,8 @@ abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
 
             AudioPlayerState.READY -> {
                 mediaStateCurrentlyPlaying = MediaStateModel(
-                    position = audioPlayer.position,
-                    duration = audioPlayer.duration,
+                    position = medxAudioPlayer.position,
+                    duration = medxAudioPlayer.duration,
                     state = state
                 )
             }
@@ -392,7 +392,7 @@ abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
 
     @OptIn(UnstableApi::class)
     override fun onDestroy() {
-        audioPlayer.destroy()
+        medxAudioPlayer.destroy()
         mediaSession?.release()
         mediaSession = null
         super.onDestroy()
