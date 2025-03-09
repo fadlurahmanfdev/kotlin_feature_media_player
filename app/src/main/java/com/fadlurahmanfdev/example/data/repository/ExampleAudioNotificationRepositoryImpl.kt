@@ -6,11 +6,12 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.receiver.ExampleAudioPlayerReceiver
-import com.fadlurahmanfdev.kotlin_feature_media_player.data.dto.model.MediaNotificationActionModel
-import com.fadlurahmanfdev.kotlin_feature_media_player.domain.manager.FeatureAudioPlayerManager
+import com.fadlurahmanfdev.medx.data.dto.model.MediaNotificationActionModel
+import com.fadlurahmanfdev.medx.domain.manager.FeatureAudioPlayerManager
+import com.fadlurahmanfdev.medx.data.repository.BaseAudioNotificationRepository
 
 class ExampleAudioNotificationRepositoryImpl(context: Context) :
-    com.fadlurahmanfdev.kotlin_feature_media_player.data.repository.BaseAudioNotificationRepository(context),
+    BaseAudioNotificationRepository(context),
     ExampleMediaNotificationRepository {
     override fun createMediaNotificationChannel() {
         super.createMediaNotificationChannel(

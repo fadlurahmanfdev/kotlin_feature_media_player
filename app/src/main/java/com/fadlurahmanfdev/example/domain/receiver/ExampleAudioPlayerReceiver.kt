@@ -3,8 +3,8 @@ package com.fadlurahmanfdev.example.domain.receiver
 import android.content.Context
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
-import com.fadlurahmanfdev.kotlin_feature_media_player.domain.manager.FeatureAudioPlayerManager
-import com.fadlurahmanfdev.kotlin_feature_media_player.domain.receiver.FeatureAudioPlayerReceiver
+import com.fadlurahmanfdev.medx.domain.manager.FeatureAudioPlayerManager
+import com.fadlurahmanfdev.medx.domain.receiver.FeatureAudioPlayerReceiver
 import com.fadlurahmanfdev.example.domain.service.ExampleAudioPlayerService
 
 @OptIn(UnstableApi::class)

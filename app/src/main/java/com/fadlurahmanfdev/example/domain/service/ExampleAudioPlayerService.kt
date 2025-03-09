@@ -7,9 +7,9 @@ import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
-import com.fadlurahmanfdev.kotlin_feature_media_player.data.dto.model.MediaStateModel
-import com.fadlurahmanfdev.kotlin_feature_media_player.data.enums.AudioPlayerState
-import com.fadlurahmanfdev.kotlin_feature_media_player.domain.service.FeatureAudioPlayerService
+import com.fadlurahmanfdev.medx.data.dto.model.MediaStateModel
+import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
+import com.fadlurahmanfdev.medx.domain.service.FeatureAudioPlayerService
 import com.fadlurahmanfdev.example.data.repository.ExampleAudioNotificationRepositoryImpl
 import com.fadlurahmanfdev.example.data.repository.ExampleMediaNotificationRepository
 

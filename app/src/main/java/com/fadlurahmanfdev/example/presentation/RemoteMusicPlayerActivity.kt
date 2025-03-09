@@ -14,10 +14,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
-import com.fadlurahmanfdev.kotlin_feature_media_player.data.enums.AudioPlayerEvent
-import com.fadlurahmanfdev.kotlin_feature_media_player.data.enums.AudioPlayerState
-import com.fadlurahmanfdev.kotlin_feature_media_player.domain.manager.FeatureAudioPlayerManager
-import com.fadlurahmanfdev.kotlin_feature_media_player.domain.manager.FeatureAudioPlayerReceiverManager
+import com.fadlurahmanfdev.medx.data.enums.AudioPlayerEvent
+import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
+import com.fadlurahmanfdev.medx.domain.manager.FeatureAudioPlayerManager
+import com.fadlurahmanfdev.medx.domain.manager.FeatureAudioPlayerReceiverManager
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.service.ExampleAudioPlayerService
 

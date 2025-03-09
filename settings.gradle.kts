@@ -22,4 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "kotlin_feature_media_player"
 include(":app")
-include(":feature_media_player")
+include(":medx")
