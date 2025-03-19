@@ -19,6 +19,7 @@
                 <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.SEND_INFO" />
             </intent-filter>
         </receiver>
+
         <service
             android:name="com.fadlurahmanfdev.medx.domain.service.FeatureAudioPlayerService"
             android:exported="false">
@@ -30,6 +31,13 @@
                 <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_NEXT_AUDIO" />
                 <action android:name="co.id.fadlurahmanfdev.feature_media_player.ACTION_SEEK_TO_POSITION" />
                 <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.SEND_INFO" />
+            </intent-filter>
+        </service>
+        <service
+            android:name="com.fadlurahmanfdev.medx.domain.service.BaseMedxAudioPlayerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_REMOTE_AUDIO" />
             </intent-filter>
         </service>
     </application>

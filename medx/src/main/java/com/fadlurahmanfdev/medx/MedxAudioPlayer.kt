@@ -1,8 +1,6 @@
 package com.fadlurahmanfdev.medx
 
 import android.content.Context
-import androidx.media3.common.util.UnstableApi
-import com.fadlurahmanfdev.medx.domain.common.BaseAudioPlayer
+import com.fadlurahmanfdev.medx.domain.common.BaseMedxAudioPlayerV2
 
-@UnstableApi
-class MedxAudioPlayer(override val context: Context) : BaseAudioPlayer(context) {}
+class MedxAudioPlayer(val context: Context) : BaseMedxAudioPlayerV2(context) {}

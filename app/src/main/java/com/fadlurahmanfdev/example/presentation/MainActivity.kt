@@ -28,6 +28,12 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
             desc = "Play remote music",
             enum = "PLAY_REMOTE_MUSIC"
         ),
+        FeatureModel(
+            featureIcon = R.drawable.baseline_developer_mode_24,
+            title = "Play Music V2",
+            desc = "Play remote music V2",
+            enum = "PLAY_REMOTE_MUSIC_V2"
+        ),
     )
 
     private lateinit var rv: RecyclerView
@@ -71,6 +77,11 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
 
             "PLAY_REMOTE_MUSIC" -> {
                 val intent = Intent(this, RemoteMusicPlayerActivity::class.java)
+                startActivity(intent)
+            }
+
+            "PLAY_REMOTE_MUSIC_V2" -> {
+                val intent = Intent(this, RemoteMusicPlayerActivityV2::class.java)
                 startActivity(intent)
             }
         }

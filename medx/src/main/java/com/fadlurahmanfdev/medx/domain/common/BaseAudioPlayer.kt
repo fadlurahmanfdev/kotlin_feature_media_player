@@ -17,7 +17,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import androidx.media3.session.MediaSession
 import com.fadlurahmanfdev.medx.data.enums.AudioPlayerEvent
 import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
 import com.fadlurahmanfdev.medx.utilities.CacheUtilities
@@ -25,7 +24,6 @@ import com.fadlurahmanfdev.medx.utilities.CacheUtilities
 @UnstableApi
 abstract class BaseAudioPlayer(open val context: Context) : Player.Listener, AnalyticsListener {
     private lateinit var exoPlayer: ExoPlayer
-    private lateinit var mediaSession: MediaSession
     private var listener: Listener? = null
     private var _duration: Long = 0L
     val duration: Long
@@ -43,7 +41,6 @@ abstract class BaseAudioPlayer(open val context: Context) : Player.Listener, Ana
 
     open fun initialize() {
         exoPlayer = ExoPlayer.Builder(context).build()
-//        mediaSession = androidx.media3.session.MediaSession.Builder(context, exoPlayer).setCallback().build()
 
         exoPlayer.addListener(this)
         exoPlayer.addAnalyticsListener(this)

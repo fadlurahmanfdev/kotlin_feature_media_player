@@ -1,5 +1,6 @@
 package com.fadlurahmanfdev.medx.data.constant
 
+@Deprecated(message = "Deprecated, use MedxConstant")
 object FeatureAudioPlayerConstant {
     const val ACTION_GET_INFO_CURRENTLY_AUDIO_PLAYING =
         "com.fadlurahmanfdev.kotlin_feature_media_player.ACTION_GET_INFO_CURRENTLY_AUDIO_PLAYING"

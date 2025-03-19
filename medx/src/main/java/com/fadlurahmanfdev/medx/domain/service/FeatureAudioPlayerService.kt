@@ -13,7 +13,7 @@ import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
-import com.fadlurahmanfdev.medx.MedxAudioPlayer
+import com.fadlurahmanfdev.medx.AudioPlayer
 import com.fadlurahmanfdev.medx.data.constant.FeatureAudioPlayerConstant
 import com.fadlurahmanfdev.medx.data.constant.FeatureMediaPlayerErrorConstant
 import com.fadlurahmanfdev.medx.data.dto.model.MediaStateModel
@@ -25,7 +25,7 @@ import java.util.Calendar
 
 @UnstableApi
 abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
-    private lateinit var medxAudioPlayer: MedxAudioPlayer
+    private lateinit var audioPlayer: AudioPlayer
 
     private var notificationId: Int = -1
     private lateinit var mediaItems: List<MediaItem>
@@ -81,9 +81,9 @@ abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
     override fun onCreate() {
         super.onCreate()
         Log.d(this::class.java.simpleName, "initialize audio player")
-        medxAudioPlayer = MedxAudioPlayer(applicationContext)
-        medxAudioPlayer.initialize()
-        medxAudioPlayer.addListener(this)
+        audioPlayer = AudioPlayer(applicationContext)
+        audioPlayer.initialize()
+        audioPlayer.addListener(this)
         Log.d(this::class.java.simpleName, "successfully initialize audio player")
 
         mediaSession = MediaSessionCompat(this, "FeatureAudioPlayerService")
@@ -200,7 +200,7 @@ abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
         // Set media item want to be played
         mediaItemCurrentlyPlaying = mediaItems.first()
 
-        medxAudioPlayer.playRemoteAudio(mediaItems)
+        audioPlayer.playRemoteAudio(mediaItems)
 
         if (mediaSession == null) {
             mediaSession = MediaSessionCompat(this, "FeatureAudioPlayerService")
@@ -218,29 +218,29 @@ abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
     }
 
     private fun onStartCommandPauseAudio(intent: Intent) {
-        medxAudioPlayer.pause()
+        audioPlayer.pause()
         onPauseAudio(intent)
     }
 
     private fun onStartCommandResumeAudio(intent: Intent) {
-        medxAudioPlayer.resume()
+        audioPlayer.resume()
         onResumeAudio(intent)
     }
 
     private fun onStartCommandPreviousAudio(intent: Intent) {
-        medxAudioPlayer.seekToPrevious()
+        audioPlayer.seekToPrevious()
         onSkipToPreviousAudio(intent)
     }
 
     private fun onStartCommandNextAudio(intent: Intent) {
-        medxAudioPlayer.seekToNext()
+        audioPlayer.seekToNext()
         onSkipToNextAudio(intent)
     }
 
     private fun onStartCommandSeekToPosition(intent: Intent) {
         val position = intent.getLongExtra(FeatureAudioPlayerConstant.PARAM_SEEK_TO_POSITION, -1L)
         if (position != -1L) {
-            medxAudioPlayer.seekToPosition(position = position)
+            audioPlayer.seekToPosition(position = position)
             onSeekToPosition(position)
         } else {
             Log.e(
@@ -277,8 +277,8 @@ abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
 
             AudioPlayerState.READY -> {
                 mediaStateCurrentlyPlaying = MediaStateModel(
-                    position = medxAudioPlayer.position,
-                    duration = medxAudioPlayer.duration,
+                    position = audioPlayer.position,
+                    duration = audioPlayer.duration,
                     state = state
                 )
             }
@@ -392,7 +392,7 @@ abstract class FeatureAudioPlayerService : Service(), BaseAudioPlayer.Listener {
 
     @OptIn(UnstableApi::class)
     override fun onDestroy() {
-        medxAudioPlayer.destroy()
+        audioPlayer.destroy()
         mediaSession?.release()
         mediaSession = null
         super.onDestroy()
