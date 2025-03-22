@@ -1,4 +1,4 @@
-package com.fadlurahmanfdev.medx.domain.receiver
+package com.fadlurahmanfdev.medx.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context

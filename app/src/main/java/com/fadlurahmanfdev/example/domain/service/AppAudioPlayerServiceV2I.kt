@@ -9,10 +9,10 @@ import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.data.repository.ExampleAudioNotificationRepositoryImpl
 import com.fadlurahmanfdev.example.data.repository.ExampleMediaNotificationRepository
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
-import com.fadlurahmanfdev.medx.domain.service.BaseMedxAudioPlayerService
+import com.fadlurahmanfdev.medx.service.BaseIMedxAudioPlayerService
 
 @OptIn(UnstableApi::class)
-class AppAudioPlayerServiceV2 : BaseMedxAudioPlayerService() {
+class AppAudioPlayerServiceV2I : BaseIMedxAudioPlayerService() {
     private lateinit var exampleMediaNotificationRepository: ExampleMediaNotificationRepository
 
     override fun onInitAndCreateMediaNotificationChannel() {

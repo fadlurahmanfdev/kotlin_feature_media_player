@@ -1,4 +1,4 @@
-package com.fadlurahmanfdev.medx.domain.service
+package com.fadlurahmanfdev.medx.service
 
 import android.app.Notification
 import android.app.Service
@@ -13,22 +13,22 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.medx.MedxAudioPlayer
+import com.fadlurahmanfdev.medx.base.IMedxAudioPlayerListener
 import com.fadlurahmanfdev.medx.constant.MedxConstant
 import com.fadlurahmanfdev.medx.constant.MedxErrorConstant
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
-import com.fadlurahmanfdev.medx.domain.common.BaseMedxAudioPlayer
 
 @UnstableApi
-abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayer.Listener {
+abstract class BaseIMedxAudioPlayerService : Service(), IMedxAudioPlayerListener {
     private lateinit var audioPlayer: MedxAudioPlayer
 
     var notificationId: Int = -1
     private lateinit var mediaItems: List<MediaItem>
     lateinit var mediaMetadata: MediaMetadata
 
-    private var _Medx_audioPlayerState: MedxAudioPlayerState = MedxAudioPlayerState.IDLE
+    private var _medxAudioPlayerState: MedxAudioPlayerState = MedxAudioPlayerState.IDLE
     val medxAudioPlayerState: MedxAudioPlayerState
-        get() = _Medx_audioPlayerState
+        get() = _medxAudioPlayerState
     private var _duration: Long = 0L
     val duration: Long
         get() = _duration
@@ -94,7 +94,10 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayer.Liste
         return START_STICKY
     }
 
-    private fun onStartCommandPlayRemoteAudio(intent: Intent) {
+    /**
+     * Handle service when command play remote audio.
+     * */
+    open fun onStartCommandPlayRemoteAudio(intent: Intent) {
         val mediaItems: List<MediaItem> = getMediaItems(intent)
 
         // throw if the mediaItems empty
@@ -116,6 +119,8 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayer.Liste
 
         this.mediaItems = mediaItems
 
+        audioPlayer.playHttpAudio(mediaItems)
+
         startForeground(
             notificationId,
             idleAudioNotification(
@@ -124,48 +129,12 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayer.Liste
                 mediaSession = mediaSession!!
             )
         )
-        onPlayRemoteAudio(intent)
     }
 
-    private fun onStartCommandPauseAudio(intent: Intent) {
-        onPauseAudio(intent)
-    }
-
-    private fun onStartCommandResumeAudio(intent: Intent) {
-        if (medxAudioPlayerState == MedxAudioPlayerState.PAUSED) {
-            notificationId = intent.getIntExtra(MedxConstant.PARAM_NOTIFICATION_ID, -1)
-            startForeground(
-                notificationId,
-                idleAudioNotification(
-                    notificationId = notificationId,
-                    mediaItem = mediaItems.first(),
-                    mediaSession = mediaSession!!
-                )
-            )
-            onResumeAudio(intent)
-        }
-    }
-
-    private fun onStartCommandSkipToPreviousAudio(intent: Intent) {
-        onSkipToPreviousAudio()
-    }
-
-    private fun onStartCommandSkipToNextAudio(intent: Intent) {
-        onSkipToNextAudio()
-    }
-
-    private fun onStartCommandSeekToPosition(intent: Intent) {
-        val position = intent.getLongExtra(MedxConstant.PARAM_POSITION, -1L)
-        if (position != -1L) {
-            onSeekToPosition(position)
-        }
-    }
-
-    open fun onPlayRemoteAudio(intent: Intent) {
-        audioPlayer.playRemoteAudio(mediaItems)
-    }
-
-    open fun onPauseAudio(intent: Intent) {
+    /**
+     * Handle service when command pause remote audio.
+     * */
+    open fun onStartCommandPauseAudio(intent: Intent) {
         audioPlayer.pause()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_DETACH)
@@ -174,20 +143,57 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayer.Liste
         }
     }
 
-    open fun onResumeAudio(intent: Intent) {
-        audioPlayer.resume()
+    /**
+     * Handle service when command resume remote audio.
+     * */
+    open fun onStartCommandResumeAudio(intent: Intent) {
+        if (medxAudioPlayerState == MedxAudioPlayerState.PAUSED) {
+            notificationId = intent.getIntExtra(MedxConstant.PARAM_NOTIFICATION_ID, -1)
+
+            if (notificationId == -1) {
+                Log.wtf(
+                    this::class.java.simpleName,
+                    "Medx-LOG %%% - unable to resume audio caused by unable to get notification id: $notificationId"
+                )
+                return
+            }
+
+            audioPlayer.resume()
+
+            startForeground(
+                notificationId,
+                idleAudioNotification(
+                    notificationId = notificationId,
+                    mediaItem = mediaItems.first(),
+                    mediaSession = mediaSession!!
+                )
+            )
+        } else {
+            Log.i(
+                this::class.java.simpleName,
+                "Medx-LOG %%% - unable to resume audio, current audio player state is $medxAudioPlayerState"
+            )
+        }
     }
 
-
-    open fun onSkipToPreviousAudio() {
-        audioPlayer.skipToPreviousItem()
+    open fun onStartCommandSkipToPreviousAudio(intent: Intent) {
+        audioPlayer.skipToPreviousMediaItem()
     }
 
-    open fun onSkipToNextAudio() {
-        audioPlayer.skipToNextItem()
+    open fun onStartCommandSkipToNextAudio(intent: Intent) {
+        audioPlayer.skipToNextMediaItem()
     }
 
-    open fun onSeekToPosition(position: Long) {
+    open fun onStartCommandSeekToPosition(intent: Intent) {
+        val position = intent.getLongExtra(MedxConstant.PARAM_POSITION, -1L)
+        if (position == -1L) {
+            Log.wtf(
+                this::class.java.simpleName,
+                "Medx-LOG %%% - unable to seek audio position, unable to get position: $position"
+            )
+           return
+        }
+
         audioPlayer.seekToPosition(position)
     }
 
@@ -218,7 +224,7 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayer.Liste
             this::class.java.simpleName,
             "Medx-LOG %%% - on audio player state changed into $state"
         )
-        _Medx_audioPlayerState = state
+        _medxAudioPlayerState = state
         sendBroadcastSendAudioStateInfo()
     }
 

@@ -15,7 +15,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
-import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2
+import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2I
 import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.BUFFERING
@@ -78,7 +78,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
                 PLAYING -> {
                     MedxAudioPlayerManager.pause(
                         this,
-                        AppAudioPlayerServiceV2::class.java
+                        AppAudioPlayerServiceV2I::class.java
                     )
                 }
 
@@ -86,7 +86,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
                     MedxAudioPlayerManager.resume(
                         this,
                         notificationId = 1,
-                        AppAudioPlayerServiceV2::class.java
+                        AppAudioPlayerServiceV2I::class.java
                     )
                 }
 
@@ -97,11 +97,11 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
         }
 
         ivPrevious.setOnClickListener {
-            MedxAudioPlayerManager.skipToPrevious(context = this, AppAudioPlayerServiceV2::class.java)
+            MedxAudioPlayerManager.skipToPrevious(context = this, AppAudioPlayerServiceV2I::class.java)
         }
 
         ivNext.setOnClickListener {
-            MedxAudioPlayerManager.skipToNext(context = this, AppAudioPlayerServiceV2::class.java)
+            MedxAudioPlayerManager.skipToNext(context = this, AppAudioPlayerServiceV2I::class.java)
         }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -114,7 +114,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
                     MedxAudioPlayerManager.seekToPosition(
                         this@RemoteMusicPlayerActivityV2,
                         progress.toLong(),
-                        AppAudioPlayerServiceV2::class.java
+                        AppAudioPlayerServiceV2I::class.java
                     )
                 }
             }
@@ -138,7 +138,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
             this,
             notificationId = 1,
             mediaItems = audios,
-            AppAudioPlayerServiceV2::class.java
+            AppAudioPlayerServiceV2I::class.java
         )
     }
 

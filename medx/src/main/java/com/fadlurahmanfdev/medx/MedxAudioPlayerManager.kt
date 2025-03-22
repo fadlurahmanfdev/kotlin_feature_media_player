@@ -14,13 +14,13 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.medx.constant.MedxConstant
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
-import com.fadlurahmanfdev.medx.domain.receiver.BaseMedxAudioPlayerReceiver
-import com.fadlurahmanfdev.medx.domain.service.BaseMedxAudioPlayerService
+import com.fadlurahmanfdev.medx.receiver.BaseMedxAudioPlayerReceiver
+import com.fadlurahmanfdev.medx.service.BaseIMedxAudioPlayerService
 
 class MedxAudioPlayerManager(val context: Context) {
     companion object {
         @UnstableApi
-        fun <T : BaseMedxAudioPlayerService> playRemoteAudio(
+        fun <T : BaseIMedxAudioPlayerService> playRemoteAudio(
             context: Context,
             notificationId: Int,
             mediaItems: List<MediaItem>,
@@ -39,7 +39,7 @@ class MedxAudioPlayerManager(val context: Context) {
         }
 
         @UnstableApi
-        fun <T : BaseMedxAudioPlayerService> pause(
+        fun <T : BaseIMedxAudioPlayerService> pause(
             context: Context,
             clazz: Class<T>
         ) {
@@ -51,7 +51,7 @@ class MedxAudioPlayerManager(val context: Context) {
         }
 
         @UnstableApi
-        fun <T : BaseMedxAudioPlayerService> resume(
+        fun <T : BaseIMedxAudioPlayerService> resume(
             context: Context,
             notificationId: Int,
             clazz: Class<T>
@@ -64,7 +64,7 @@ class MedxAudioPlayerManager(val context: Context) {
             ContextCompat.startForegroundService(context, intent)
         }
 
-        fun <T : BaseMedxAudioPlayerService> skipToPrevious(
+        fun <T : BaseIMedxAudioPlayerService> skipToPrevious(
             context: Context,
             clazz: Class<T>
         ) {
@@ -75,7 +75,7 @@ class MedxAudioPlayerManager(val context: Context) {
             ContextCompat.startForegroundService(context, intent)
         }
 
-        fun <T : BaseMedxAudioPlayerService> skipToNext(
+        fun <T : BaseIMedxAudioPlayerService> skipToNext(
             context: Context,
             clazz: Class<T>
         ) {
@@ -86,7 +86,7 @@ class MedxAudioPlayerManager(val context: Context) {
             ContextCompat.startForegroundService(context, intent)
         }
 
-        fun <T : BaseMedxAudioPlayerService> seekToPosition(
+        fun <T : BaseIMedxAudioPlayerService> seekToPosition(
             context: Context,
             position: Long,
             clazz: Class<T>

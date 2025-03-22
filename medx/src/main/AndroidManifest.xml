@@ -8,7 +8,7 @@
 
     <application>
         <receiver
-            android:name="com.fadlurahmanfdev.medx.domain.receiver.BaseMedxAudioPlayerReceiver"
+            android:name="com.fadlurahmanfdev.medx.receiver.BaseMedxAudioPlayerReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
@@ -19,7 +19,7 @@
             </intent-filter>
         </receiver>
         <service
-            android:name="com.fadlurahmanfdev.medx.domain.service.BaseMedxAudioPlayerService"
+            android:name="com.fadlurahmanfdev.medx.service.BaseIMedxAudioPlayerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_REMOTE_AUDIO" />
