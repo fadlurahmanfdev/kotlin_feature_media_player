@@ -12,7 +12,7 @@ import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import com.fadlurahmanfdev.medx.data.dto.model.MediaNotificationActionModel
+import com.fadlurahmanfdev.medx.data.model.MediaNotificationActionModel
 
 abstract class BaseAudioNotificationRepository(private val context: Context) {
     private var notificationManager: NotificationManager =

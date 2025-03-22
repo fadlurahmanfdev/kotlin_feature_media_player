@@ -20,11 +20,11 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.session.MediaSession
-import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
+import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
 import com.fadlurahmanfdev.medx.utilities.CacheUtilities
 
 
-open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener {
+open class BaseMedxAudioPlayer(private val context: Context) : Player.Listener {
     lateinit var exoPlayer: ExoPlayer
     lateinit var mediaSession: MediaSession
     private var listener: Listener? = null
@@ -36,9 +36,9 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
     val position: Long
         get() = _position
 
-    private var _audioPlayerState: AudioPlayerState = AudioPlayerState.IDLE
-    val state: AudioPlayerState
-        get() = _audioPlayerState
+    private var _Medx_audioPlayerState: MedxAudioPlayerState = MedxAudioPlayerState.IDLE
+    val state: MedxAudioPlayerState
+        get() = _Medx_audioPlayerState
 
     fun addListener(listener: Listener) {
         this.listener = listener
@@ -74,7 +74,7 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
                     intent: Intent
                 ): Boolean {
                     Log.d(
-                        this@BaseMedxAudioPlayerV2::class.java.simpleName,
+                        this@BaseMedxAudioPlayer::class.java.simpleName,
                         "Medx-LOG %%% media session on media button event, intent:$intent"
                     )
                     if (intent.action == Intent.ACTION_MEDIA_BUTTON) {
@@ -93,18 +93,18 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
                         }
 
                         Log.d(
-                            this@BaseMedxAudioPlayerV2::class.java.simpleName,
+                            this@BaseMedxAudioPlayer::class.java.simpleName,
                             "Medx-LOG %%% media session, received key event: $keyEvent"
                         )
 
                         if (keyEvent != null) {
                             when (keyEvent.keyCode) {
                                 KeyEvent.KEYCODE_MEDIA_PAUSE -> {
-                                    onAudioStateChanged(AudioPlayerState.PAUSED)
+                                    onAudioStateChanged(MedxAudioPlayerState.PAUSED)
                                 }
 
                                 KeyEvent.KEYCODE_MEDIA_PLAY -> {
-                                    onAudioStateChanged(AudioPlayerState.PLAYING)
+                                    onAudioStateChanged(MedxAudioPlayerState.PLAYING)
                                 }
                             }
                         }
@@ -154,31 +154,31 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
     }
 
     fun pause() {
-        if (state == AudioPlayerState.PLAYING) {
+        if (state == MedxAudioPlayerState.PLAYING) {
             handler.removeCallbacks(audioPositionRunnable)
             exoPlayer.pause()
-            onAudioStateChanged(AudioPlayerState.PAUSED)
+            onAudioStateChanged(MedxAudioPlayerState.PAUSED)
         }
     }
 
     fun resume() {
-        if (state == AudioPlayerState.PAUSED) {
+        if (state == MedxAudioPlayerState.PAUSED) {
             exoPlayer.play()
-            onAudioStateChanged(AudioPlayerState.PLAYING)
+            onAudioStateChanged(MedxAudioPlayerState.PLAYING)
             handler.postDelayed(audioPositionRunnable, 500)
         }
     }
 
     fun stop() {
-        if (state == AudioPlayerState.PLAYING || state == AudioPlayerState.STOPPED) {
+        if (state == MedxAudioPlayerState.PLAYING || state == MedxAudioPlayerState.STOPPED) {
             handler.removeCallbacks(audioPositionRunnable)
             exoPlayer.stop()
-            onAudioStateChanged(AudioPlayerState.STOPPED)
+            onAudioStateChanged(MedxAudioPlayerState.STOPPED)
         }
     }
 
     fun release() {
-        if (state != AudioPlayerState.STOPPED) {
+        if (state != MedxAudioPlayerState.STOPPED) {
             stop()
         }
         mediaSession.release()
@@ -218,21 +218,21 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
         super.onPlaybackStateChanged(playbackState)
         when (playbackState) {
             Player.STATE_IDLE -> {
-                onAudioStateChanged(AudioPlayerState.READY)
+                onAudioStateChanged(MedxAudioPlayerState.READY)
             }
 
             Player.STATE_BUFFERING -> {
-                onAudioStateChanged(AudioPlayerState.BUFFERING)
+                onAudioStateChanged(MedxAudioPlayerState.BUFFERING)
             }
 
             Player.STATE_READY -> {
                 _duration = exoPlayer.duration
                 listener?.onDurationChanged(duration)
-                onAudioStateChanged(AudioPlayerState.READY)
+                onAudioStateChanged(MedxAudioPlayerState.READY)
             }
 
             Player.STATE_ENDED -> {
-                onAudioStateChanged(AudioPlayerState.ENDED)
+                onAudioStateChanged(MedxAudioPlayerState.ENDED)
             }
         }
     }
@@ -240,17 +240,17 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         super.onIsPlayingChanged(isPlaying)
         if (isPlaying) {
-            onAudioStateChanged(AudioPlayerState.PLAYING)
+            onAudioStateChanged(MedxAudioPlayerState.PLAYING)
         }
     }
 
-    private fun onAudioStateChanged(state: AudioPlayerState) {
-        if (_audioPlayerState != state) {
+    private fun onAudioStateChanged(state: MedxAudioPlayerState) {
+        if (_Medx_audioPlayerState != state) {
             Log.d(
                 this::class.java.simpleName,
-                "Medx-LOG %%% - audio state changed from $_audioPlayerState into $state"
+                "Medx-LOG %%% - audio state changed from $_Medx_audioPlayerState into $state"
             )
-            _audioPlayerState = state
+            _Medx_audioPlayerState = state
             listener?.onPlayerStateChanged(state)
         }
     }
@@ -264,9 +264,9 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
         /**
          * this function triggered when state of audio player changed.
          *
-         * @param state the state of the playback (e.g., [AudioPlayerState.IDLE], [AudioPlayerState.BUFFERING], etc)
+         * @param state the state of the playback (e.g., [MedxAudioPlayerState.IDLE], [MedxAudioPlayerState.BUFFERING], etc)
          * */
-        fun onPlayerStateChanged(state: AudioPlayerState) {}
+        fun onPlayerStateChanged(state: MedxAudioPlayerState) {}
         fun onDurationChanged(duration: Long) {}
         fun onPositionChanged(position: Long) {}
         fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {}

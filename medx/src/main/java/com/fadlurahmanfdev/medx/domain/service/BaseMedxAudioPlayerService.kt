@@ -15,20 +15,20 @@ import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.medx.MedxAudioPlayer
 import com.fadlurahmanfdev.medx.constant.MedxConstant
 import com.fadlurahmanfdev.medx.constant.MedxErrorConstant
-import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
-import com.fadlurahmanfdev.medx.domain.common.BaseMedxAudioPlayerV2
+import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx.domain.common.BaseMedxAudioPlayer
 
 @UnstableApi
-abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayerV2.Listener {
+abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayer.Listener {
     private lateinit var audioPlayer: MedxAudioPlayer
 
     var notificationId: Int = -1
     private lateinit var mediaItems: List<MediaItem>
     lateinit var mediaMetadata: MediaMetadata
 
-    private var _audioPlayerState: AudioPlayerState = AudioPlayerState.IDLE
-    val audioPlayerState: AudioPlayerState
-        get() = _audioPlayerState
+    private var _Medx_audioPlayerState: MedxAudioPlayerState = MedxAudioPlayerState.IDLE
+    val medxAudioPlayerState: MedxAudioPlayerState
+        get() = _Medx_audioPlayerState
     private var _duration: Long = 0L
     val duration: Long
         get() = _duration
@@ -132,7 +132,7 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayerV2.Lis
     }
 
     private fun onStartCommandResumeAudio(intent: Intent) {
-        if (audioPlayerState == AudioPlayerState.PAUSED) {
+        if (medxAudioPlayerState == MedxAudioPlayerState.PAUSED) {
             notificationId = intent.getIntExtra(MedxConstant.PARAM_NOTIFICATION_ID, -1)
             startForeground(
                 notificationId,
@@ -212,13 +212,13 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayerV2.Lis
         sendBroadcastSendPositionInfo()
     }
 
-    override fun onPlayerStateChanged(state: AudioPlayerState) {
+    override fun onPlayerStateChanged(state: MedxAudioPlayerState) {
         super.onPlayerStateChanged(state)
         Log.d(
             this::class.java.simpleName,
             "Medx-LOG %%% - on audio player state changed into $state"
         )
-        _audioPlayerState = state
+        _Medx_audioPlayerState = state
         sendBroadcastSendAudioStateInfo()
     }
 
@@ -254,7 +254,7 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayerV2.Lis
     private fun sendBroadcastSendAudioStateInfo() {
         val intent = Intent().apply {
             action = MedxConstant.ACTION_AUDIO_STATE_INFO
-            putExtra(MedxConstant.PARAM_STATE, audioPlayerState.name)
+            putExtra(MedxConstant.PARAM_STATE, medxAudioPlayerState.name)
         }
         applicationContext.sendBroadcast(intent)
     }

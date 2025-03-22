@@ -8,7 +8,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.data.repository.ExampleAudioNotificationRepositoryImpl
 import com.fadlurahmanfdev.example.data.repository.ExampleMediaNotificationRepository
-import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
+import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
 import com.fadlurahmanfdev.medx.domain.service.BaseMedxAudioPlayerService
 
 @OptIn(UnstableApi::class)
@@ -48,7 +48,7 @@ class AppAudioPlayerServiceV2 : BaseMedxAudioPlayerService() {
         updateNotification()
     }
 
-    override fun onPlayerStateChanged(state: AudioPlayerState) {
+    override fun onPlayerStateChanged(state: MedxAudioPlayerState) {
         super.onPlayerStateChanged(state)
         updateNotification()
     }
@@ -57,11 +57,11 @@ class AppAudioPlayerServiceV2 : BaseMedxAudioPlayerService() {
     private fun updateNotification(){
         if(mediaSession == null) return
 
-        val playbackStateCompat = when (audioPlayerState) {
-            AudioPlayerState.IDLE, AudioPlayerState.BUFFERING, AudioPlayerState.READY, AudioPlayerState.PLAYING -> PlaybackStateCompat.STATE_PLAYING
-            AudioPlayerState.PAUSED -> PlaybackStateCompat.STATE_PAUSED
-            AudioPlayerState.STOPPED -> PlaybackStateCompat.STATE_STOPPED
-            AudioPlayerState.ENDED -> PlaybackStateCompat.STATE_STOPPED
+        val playbackStateCompat = when (medxAudioPlayerState) {
+            MedxAudioPlayerState.IDLE, MedxAudioPlayerState.BUFFERING, MedxAudioPlayerState.READY, MedxAudioPlayerState.PLAYING -> PlaybackStateCompat.STATE_PLAYING
+            MedxAudioPlayerState.PAUSED -> PlaybackStateCompat.STATE_PAUSED
+            MedxAudioPlayerState.STOPPED -> PlaybackStateCompat.STATE_STOPPED
+            MedxAudioPlayerState.ENDED -> PlaybackStateCompat.STATE_STOPPED
         }
 
         exampleMediaNotificationRepository.updateMediaNotification(

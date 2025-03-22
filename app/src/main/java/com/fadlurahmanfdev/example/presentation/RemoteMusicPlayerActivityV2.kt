@@ -17,10 +17,10 @@ import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2
 import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
-import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
-import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState.BUFFERING
-import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState.PAUSED
-import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState.PLAYING
+import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.BUFFERING
+import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.PAUSED
+import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.PLAYING
 
 class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.Listener {
     lateinit var medxAudioPlayerManager: MedxAudioPlayerManager
@@ -36,7 +36,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
 
     private lateinit var audios: List<MediaItem>
 
-    private var audioState = AudioPlayerState.IDLE
+    private var audioState = MedxAudioPlayerState.IDLE
 
     @UnstableApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,7 +156,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
         seekBar.progress = position.toInt()
     }
 
-    override fun onReceiveInfoState(state: AudioPlayerState) {
+    override fun onReceiveInfoState(state: MedxAudioPlayerState) {
         audioState = state
         when (state) {
             BUFFERING, PLAYING -> {

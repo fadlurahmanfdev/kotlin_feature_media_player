@@ -1,8 +1,8 @@
 package com.fadlurahmanfdev.medx.constant
 
-import com.fadlurahmanfdev.medx.data.exception.FeatureMediaPlayerException
+import com.fadlurahmanfdev.medx.data.exception.MedxException
 
 object MedxErrorConstant {
-    val MEDIA_ITEM_MISSING = FeatureMediaPlayerException(code = "MEDIA_ITEM_MISSING", message = "Cannot play audio, probably caused by media item is missing or empty")
-    val NOTIFICATION_ID_MISSING = FeatureMediaPlayerException(code = "NOTIFICATION_ID_MISSING", message = "The notification id is missing, notification ID is needed when start foreground service")
+    val MEDIA_ITEM_MISSING = MedxException(code = "MEDIA_ITEM_MISSING", message = "Cannot play audio, probably caused by media item is missing or empty")
+    val NOTIFICATION_ID_MISSING = MedxException(code = "NOTIFICATION_ID_MISSING", message = "The notification id is missing, notification ID is needed when start foreground service")
 }

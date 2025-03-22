@@ -13,7 +13,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.medx.constant.MedxConstant
-import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
+import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
 import com.fadlurahmanfdev.medx.domain.receiver.BaseMedxAudioPlayerReceiver
 import com.fadlurahmanfdev.medx.domain.service.BaseMedxAudioPlayerService
 
@@ -252,7 +252,7 @@ class MedxAudioPlayerManager(val context: Context) {
             try {
                 val stateString = intent?.getStringExtra(MedxConstant.PARAM_STATE)
                 if (stateString != null) {
-                    val state = AudioPlayerState.valueOf(stateString)
+                    val state = MedxAudioPlayerState.valueOf(stateString)
                     listener?.onReceiveInfoState(state)
                 }
             } catch (e: Throwable) {
@@ -346,7 +346,7 @@ class MedxAudioPlayerManager(val context: Context) {
     interface Listener {
         fun onReceiveInfoDuration(duration: Long)
         fun onReceiveInfoPosition(position: Long)
-        fun onReceiveInfoState(state: AudioPlayerState)
+        fun onReceiveInfoState(state: MedxAudioPlayerState)
         fun onReceiveInfoMediaMetaData(mediaMetadata: MediaMetadata)
     }
 }

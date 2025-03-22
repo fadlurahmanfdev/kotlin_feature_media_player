@@ -7,21 +7,6 @@ import android.util.Log
 import com.fadlurahmanfdev.medx.constant.MedxConstant
 
 abstract class BaseMedxAudioPlayerReceiver : BroadcastReceiver() {
-    companion object {
-//        private fun sendBroadcastSendEvent(
-//            context: Context,
-//            event: String,
-//        ) {
-//            val intent = Intent().apply {
-//                action = MedxConstant.ACTION_SEND_EVENT
-//                putExtra(MedxConstant.PARAM_CHANNEL, this::class.java.simpleName)
-//                putExtra(MedxConstant.PARAM_EVENT, event)
-//            }
-//            context.sendBroadcast(intent)
-//        }
-    }
-
-    //    var notificationId: Int = -1
     override fun onReceive(context: Context?, intent: Intent?) {
         Log.d(this::class.java.simpleName, "Medx-LOG %%% - receive action ${intent?.action}")
 
@@ -57,12 +42,10 @@ abstract class BaseMedxAudioPlayerReceiver : BroadcastReceiver() {
     }
 
     open fun onReceiveActionPauseAudio(context: Context, intent: Intent) {
-//        sendBroadcastSendEvent(context, AudioPlayerEvent.PAUSE.name)
         onPauseAudio(context)
     }
 
     open fun onReceiveActionResumeAudio(context: Context, intent: Intent) {
-//        sendBroadcastSendEvent(context, AudioPlayerEvent.RESUME.name)
         val notificationId = intent.getIntExtra(MedxConstant.PARAM_NOTIFICATION_ID, -1)
         Log.d(
             this::class.java.simpleName,
@@ -83,7 +66,7 @@ abstract class BaseMedxAudioPlayerReceiver : BroadcastReceiver() {
 
     open fun onReceiveActionSeekToPositionAudio(context: Context, intent: Intent) {
         val seekToPosition = intent.getLongExtra(MedxConstant.PARAM_SEEK_TO_POSITION, -1L)
-        if(seekToPosition != -1L){
+        if (seekToPosition != -1L) {
             onSeekToPositionAudio(context, seekToPosition)
         }
     }
@@ -92,5 +75,5 @@ abstract class BaseMedxAudioPlayerReceiver : BroadcastReceiver() {
     abstract fun onResumeAudio(context: Context, notificationId: Int)
     abstract fun onSkipToPreviousAudio(context: Context)
     abstract fun onSkipToNextAudio(context: Context)
-    abstract fun onSeekToPositionAudio(context: Context, position:Long)
+    abstract fun onSeekToPositionAudio(context: Context, position: Long)
 }

@@ -1,6 +1,6 @@
 package com.fadlurahmanfdev.medx.utilities
 
-class MediaPlayerUtilities {
+class MedxPlayerUtilities {
     companion object {
         fun formatToReadableTime(millis: Long): String {
             val seconds = (millis / 1000).toInt()

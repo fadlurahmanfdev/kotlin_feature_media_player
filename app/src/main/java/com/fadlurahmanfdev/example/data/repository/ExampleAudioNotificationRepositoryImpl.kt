@@ -7,7 +7,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.receiver.AppAudioPlayerReceiverV2
 import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
-import com.fadlurahmanfdev.medx.data.dto.model.MediaNotificationActionModel
+import com.fadlurahmanfdev.medx.data.model.MediaNotificationActionModel
 import com.fadlurahmanfdev.medx.data.repository.BaseAudioNotificationRepository
 
 class ExampleAudioNotificationRepositoryImpl(context: Context) :

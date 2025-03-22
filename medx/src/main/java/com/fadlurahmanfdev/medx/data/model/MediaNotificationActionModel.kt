@@ -1,4 +1,4 @@
-package com.fadlurahmanfdev.medx.data.dto.model
+package com.fadlurahmanfdev.medx.data.model
 
 import android.app.PendingIntent
 import androidx.annotation.DrawableRes
