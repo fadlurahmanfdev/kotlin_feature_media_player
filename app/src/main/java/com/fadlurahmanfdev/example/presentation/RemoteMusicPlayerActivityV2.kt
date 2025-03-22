@@ -2,11 +2,13 @@ package com.fadlurahmanfdev.example.presentation
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.media3.common.MediaItem
@@ -14,9 +16,16 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2
+import com.fadlurahmanfdev.medx.MedxAudioPlayer
 import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
+import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
+import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState.BUFFERING
+import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState.PAUSED
+import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState.PLAYING
 
-class RemoteMusicPlayerActivityV2 : AppCompatActivity() {
+class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.Listener {
+    lateinit var medxAudioPlayerManager: MedxAudioPlayerManager
+
     lateinit var seekBar: SeekBar
 
     lateinit var tvTitle: TextView
@@ -26,7 +35,9 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity() {
     lateinit var ivPlay: ImageView
     lateinit var ivNext: ImageView
 
-    private lateinit var audios:List<MediaItem>
+    private lateinit var audios: List<MediaItem>
+
+    private var audioState = AudioPlayerState.IDLE
 
     @UnstableApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,19 +59,84 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity() {
         audios = listOf(
             MediaItem.Builder()
                 .setUri(Uri.parse("https://equran.nos.wjv-1.neo.id/audio-full/Abdullah-Al-Juhany/110.mp3"))
-                .setMediaMetadata(MediaMetadata.Builder().setTitle("SURAH 110").setArtist("AL QURAN").build())
+                .setMediaMetadata(
+                    MediaMetadata.Builder().setTitle("SURAH 110").setArtist("AL QURAN").build()
+                )
                 .build(),
             MediaItem.Builder()
                 .setUri(Uri.parse("https://equran.nos.wjv-1.neo.id/audio-full/Abdullah-Al-Juhany/111.mp3"))
-                .setMediaMetadata(MediaMetadata.Builder().setTitle("SURAH 111").setArtist("AL QURAN V2").build())
+                .setMediaMetadata(
+                    MediaMetadata.Builder().setTitle("SURAH 111").setArtist("AL QURAN V2").build()
+                )
                 .build(),
         )
 
-        tvTitle.text = audios.first().mediaMetadata.title
-        tvArtist.text = audios.first().mediaMetadata.artist
+        tvTitle.text = "-"
+        tvArtist.text = "-"
+
+        ivPlay.setOnClickListener {
+            when (audioState) {
+                PLAYING -> {
+                    MedxAudioPlayer.pause(
+                        this,
+                        notificationId = 1,
+                        AppAudioPlayerServiceV2::class.java
+                    )
+                }
+
+                PAUSED -> {
+                    MedxAudioPlayer.resume(
+                        this,
+                        notificationId = 1,
+                        AppAudioPlayerServiceV2::class.java
+                    )
+                }
+
+                else -> {
+
+                }
+            }
+        }
+
+        ivPrevious.setOnClickListener {
+            MedxAudioPlayer.skipToPrevious(context = this, AppAudioPlayerServiceV2::class.java)
+        }
+
+        ivNext.setOnClickListener {
+            MedxAudioPlayer.skipToNext(context = this, AppAudioPlayerServiceV2::class.java)
+        }
+
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    Log.d(
+                        this@RemoteMusicPlayerActivityV2::class.java.simpleName,
+                        "on progress changed: $progress"
+                    )
+                    MedxAudioPlayer.seekToPosition(
+                        this@RemoteMusicPlayerActivityV2,
+                        progress.toLong(),
+                        AppAudioPlayerServiceV2::class.java
+                    )
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+            }
+
+        })
+
+        medxAudioPlayerManager = MedxAudioPlayerManager(this)
+        medxAudioPlayerManager.registerReceiver(this)
+        medxAudioPlayerManager.addListener(this)
 
 
-        MedxAudioPlayerManager.playRemoteAudio(
+        MedxAudioPlayer.playRemoteAudio(
             this,
             notificationId = 1,
             mediaItems = audios,
@@ -71,5 +147,45 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity() {
     @UnstableApi
     override fun onDestroy() {
         super.onDestroy()
+    }
+
+    override fun onReceiveInfoDuration(duration: Long) {
+        Log.d(this::class.java.simpleName, "Medx-LOG %%% - receive info duration: $duration")
+        seekBar.max = duration.toInt()
+    }
+
+    override fun onReceiveInfoPosition(position: Long) {
+        seekBar.progress = position.toInt()
+    }
+
+    override fun onReceiveInfoState(state: AudioPlayerState) {
+        audioState = state
+        when (state) {
+            BUFFERING, PLAYING -> {
+                ivPlay.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this,
+                        R.drawable.baseline_pause_24
+                    )
+                )
+            }
+
+            else -> {
+                ivPlay.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this,
+                        R.drawable.baseline_play_arrow_24
+                    )
+                )
+            }
+        }
+
+        Log.d(this::class.java.simpleName, "Medx-LOG %%% - receive info state: $state")
+    }
+
+    override fun onReceiveInfoMediaMetaData(mediaMetadata: MediaMetadata) {
+        tvTitle.text = mediaMetadata.title
+        tvArtist.text = mediaMetadata.artist
+
     }
 }

@@ -10,6 +10,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.medx.MedxAudioPlayer
 import com.fadlurahmanfdev.medx.constant.MedxConstant
@@ -23,7 +24,7 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayerV2.Lis
 
     var notificationId: Int = -1
     private lateinit var mediaItems: List<MediaItem>
-    lateinit var mediaItem: MediaItem
+    lateinit var mediaMetadata: MediaMetadata
 
     private var _audioPlayerState: AudioPlayerState = AudioPlayerState.IDLE
     val audioPlayerState: AudioPlayerState
@@ -84,6 +85,11 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayerV2.Lis
         )
         when (intent?.action) {
             MedxConstant.ACTION_PLAY_REMOTE_AUDIO -> onStartCommandPlayRemoteAudio(intent)
+            MedxConstant.ACTION_PAUSE_AUDIO -> onStartCommandPauseAudio(intent)
+            MedxConstant.ACTION_RESUME_AUDIO -> onStartCommandResumeAudio(intent)
+            MedxConstant.ACTION_SKIP_TO_PREVIOUS_AUDIO -> onStartCommandSkipToPreviousAudio(intent)
+            MedxConstant.ACTION_SKIP_TO_NEXT_AUDIO -> onStartCommandSkipToNextAudio(intent)
+            MedxConstant.ACTION_SEEK_TO_POSITION_AUDIO -> onStartCommandSeekToPosition(intent)
         }
         return START_STICKY
     }
@@ -91,7 +97,7 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayerV2.Lis
     private fun onStartCommandPlayRemoteAudio(intent: Intent) {
         val mediaItems: List<MediaItem> = getMediaItems(intent)
 
-        // throw exception if the mediaItems empty
+        // throw if the mediaItems empty
         if (mediaItems.isEmpty()) {
             Log.e(
                 this::class.java.simpleName,
@@ -110,33 +116,80 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayerV2.Lis
 
         this.mediaItems = mediaItems
 
-        // Set media item want to be played
-        mediaItem = mediaItems.first()
-
         startForeground(
             notificationId,
             idleAudioNotification(
                 notificationId = notificationId,
-                mediaItem = mediaItem,
+                mediaItem = mediaItems.first(),
                 mediaSession = mediaSession!!
             )
         )
         onPlayRemoteAudio(intent)
     }
 
+    private fun onStartCommandPauseAudio(intent: Intent) {
+        onPauseAudio(intent)
+    }
+
+    private fun onStartCommandResumeAudio(intent: Intent) {
+        if (audioPlayerState == AudioPlayerState.PAUSED) {
+            notificationId = intent.getIntExtra(MedxConstant.PARAM_NOTIFICATION_ID, -1)
+            startForeground(
+                notificationId,
+                idleAudioNotification(
+                    notificationId = notificationId,
+                    mediaItem = mediaItems.first(),
+                    mediaSession = mediaSession!!
+                )
+            )
+            onResumeAudio(intent)
+        }
+    }
+
+    private fun onStartCommandSkipToPreviousAudio(intent: Intent) {
+        onSkipToPreviousAudio()
+    }
+
+    private fun onStartCommandSkipToNextAudio(intent: Intent) {
+        onSkipToNextAudio()
+    }
+
+    private fun onStartCommandSeekToPosition(intent: Intent) {
+        val position = intent.getLongExtra(MedxConstant.PARAM_POSITION, -1L)
+        if (position != -1L) {
+            onSeekToPosition(position)
+        }
+    }
+
     open fun onPlayRemoteAudio(intent: Intent) {
         audioPlayer.playRemoteAudio(mediaItems)
     }
 
-    open fun onPauseAudio(intent: Intent) {}
+    open fun onPauseAudio(intent: Intent) {
+        audioPlayer.pause()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_DETACH)
+        } else {
+            stopForeground(false)
+        }
+    }
 
-    open fun onResumeAudio(intent: Intent) {}
+    open fun onResumeAudio(intent: Intent) {
+        audioPlayer.resume()
+    }
 
-    open fun onSkipToPreviousAudio(notificationId: Intent) {}
 
-    open fun onSkipToNextAudio(notificationId: Intent) {}
+    open fun onSkipToPreviousAudio() {
+        audioPlayer.skipToPreviousItem()
+    }
 
-    open fun onSeekToPosition(position: Long) {}
+    open fun onSkipToNextAudio() {
+        audioPlayer.skipToNextItem()
+    }
+
+    open fun onSeekToPosition(position: Long) {
+        audioPlayer.seekToPosition(position)
+    }
 
     abstract fun idleAudioNotification(
         notificationId: Int,
@@ -154,19 +207,64 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayerV2.Lis
 
     override fun onPositionChanged(position: Long) {
         super.onPositionChanged(position)
-        Log.d(this::class.java.simpleName, "Medx-LOG %%% - on position changed $position")
+//        Log.d(this::class.java.simpleName, "Medx-LOG %%% - on position changed $position")
         _position = position
+        sendBroadcastSendPositionInfo()
     }
 
     override fun onPlayerStateChanged(state: AudioPlayerState) {
         super.onPlayerStateChanged(state)
-        Log.d(this::class.java.simpleName, "Medx-LOG %%% - on audio player state $state")
+        Log.d(
+            this::class.java.simpleName,
+            "Medx-LOG %%% - on audio player state changed into $state"
+        )
         _audioPlayerState = state
+        sendBroadcastSendAudioStateInfo()
     }
 
     override fun onDurationChanged(duration: Long) {
         super.onDurationChanged(duration)
         Log.d(this::class.java.simpleName, "Medx-LOG %%% - on duration changed $duration")
         _duration = duration
+        sendBroadcastSendDurationInfo()
+    }
+
+    override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+        super.onMediaMetadataChanged(mediaMetadata)
+        this.mediaMetadata = mediaMetadata
+        sendBroadcastSendAudioMediaMetaDataInfo()
+    }
+
+    private fun sendBroadcastSendDurationInfo() {
+        val intent = Intent().apply {
+            action = MedxConstant.ACTION_AUDIO_DURATION_INFO
+            putExtra(MedxConstant.PARAM_DURATION, duration)
+        }
+        applicationContext.sendBroadcast(intent)
+    }
+
+    private fun sendBroadcastSendPositionInfo() {
+        val intent = Intent().apply {
+            action = MedxConstant.ACTION_AUDIO_POSITION_INFO
+            putExtra(MedxConstant.PARAM_POSITION, position)
+        }
+        applicationContext.sendBroadcast(intent)
+    }
+
+    private fun sendBroadcastSendAudioStateInfo() {
+        val intent = Intent().apply {
+            action = MedxConstant.ACTION_AUDIO_STATE_INFO
+            putExtra(MedxConstant.PARAM_STATE, audioPlayerState.name)
+        }
+        applicationContext.sendBroadcast(intent)
+    }
+
+    private fun sendBroadcastSendAudioMediaMetaDataInfo() {
+        val intent = Intent().apply {
+            action = MedxConstant.ACTION_AUDIO_MEDIA_META_DATA_INFO
+            putExtra(MedxConstant.PARAM_TITLE, mediaMetadata.title)
+            putExtra(MedxConstant.PARAM_ARTIST, mediaMetadata.artist)
+        }
+        applicationContext.sendBroadcast(intent)
     }
 }

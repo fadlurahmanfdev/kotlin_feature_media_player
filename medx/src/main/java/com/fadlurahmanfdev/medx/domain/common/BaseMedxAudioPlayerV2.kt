@@ -2,11 +2,14 @@ package com.fadlurahmanfdev.medx.domain.common
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import android.view.KeyEvent
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -63,17 +66,6 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
 
         mediaSession =
             MediaSession.Builder(context, exoPlayer).setCallback(object : MediaSession.Callback {
-                @UnstableApi
-                override fun onConnect(
-                    session: MediaSession,
-                    controller: MediaSession.ControllerInfo
-                ): MediaSession.ConnectionResult {
-                    Log.d(
-                        this@BaseMedxAudioPlayerV2::class.java.simpleName,
-                        "Medx-LOG %%% media session - on connect"
-                    )
-                    return super.onConnect(session, controller)
-                }
 
                 @UnstableApi
                 override fun onMediaButtonEvent(
@@ -83,8 +75,40 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
                 ): Boolean {
                     Log.d(
                         this@BaseMedxAudioPlayerV2::class.java.simpleName,
-                        "Medx-LOG %%% media session - on media button event"
+                        "Medx-LOG %%% media session on media button event, intent:$intent"
                     )
+                    if (intent.action == Intent.ACTION_MEDIA_BUTTON) {
+                        val keyEvent: KeyEvent?
+                        when {
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                                keyEvent = intent.getParcelableExtra(
+                                    Intent.EXTRA_KEY_EVENT,
+                                    KeyEvent::class.java
+                                )
+                            }
+
+                            else -> {
+                                keyEvent = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
+                            }
+                        }
+
+                        Log.d(
+                            this@BaseMedxAudioPlayerV2::class.java.simpleName,
+                            "Medx-LOG %%% media session, received key event: $keyEvent"
+                        )
+
+                        if (keyEvent != null) {
+                            when (keyEvent.keyCode) {
+                                KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                                    onAudioStateChanged(AudioPlayerState.PAUSED)
+                                }
+
+                                KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                                    onAudioStateChanged(AudioPlayerState.PLAYING)
+                                }
+                            }
+                        }
+                    }
                     return super.onMediaButtonEvent(session, controllerInfo, intent)
                 }
             }).build()
@@ -126,26 +150,106 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
         exoPlayer.setMediaSources(mediaSources)
         exoPlayer.playWhenReady = true
         exoPlayer.prepare()
-        listener?.onPlayerStateChanged(AudioPlayerState.IDLE)
         handler.postDelayed(audioPositionRunnable, 1000)
     }
 
     fun pause() {
-        handler.removeCallbacks(audioPositionRunnable)
-        exoPlayer.pause()
+        if (_audioPlayerState == AudioPlayerState.PLAYING) {
+            handler.removeCallbacks(audioPositionRunnable)
+            exoPlayer.pause()
+            onAudioStateChanged(AudioPlayerState.PAUSED)
+        }
+    }
+
+    fun resume() {
+        if (_audioPlayerState == AudioPlayerState.PAUSED) {
+            exoPlayer.play()
+            onAudioStateChanged(AudioPlayerState.PLAYING)
+            handler.postDelayed(audioPositionRunnable, 500)
+        }
     }
 
     fun stop() {
-        handler.removeCallbacks(audioPositionRunnable)
-        exoPlayer.stop()
+        if (_audioPlayerState == AudioPlayerState.PLAYING || _audioPlayerState == AudioPlayerState.STOPPED) {
+            handler.removeCallbacks(audioPositionRunnable)
+            exoPlayer.stop()
+            onAudioStateChanged(AudioPlayerState.STOPPED)
+        }
+    }
+
+    fun skipToPreviousItem() {
+        if (exoPlayer.hasPreviousMediaItem()) {
+            exoPlayer.seekToPreviousMediaItem()
+            _position = 0L
+        } else {
+            Log.i(
+                this::class.java.simpleName,
+                "Medx-LOG %%% - unable to skip to previous item because the player didnt have previous media item"
+            )
+        }
+    }
+
+    fun skipToNextItem() {
+        if (exoPlayer.hasNextMediaItem()) {
+            exoPlayer.seekToNextMediaItem()
+            _position = 0L
+        } else {
+            Log.i(
+                this::class.java.simpleName,
+                "Medx-LOG %%% - unable to skip to next item because the player didnt have next media item"
+            )
+        }
+    }
+
+    fun seekToPosition(position: Long) {
+        exoPlayer.seekTo(position)
+        _position = position
     }
 
     override fun onPlaybackStateChanged(playbackState: Int) {
         super.onPlaybackStateChanged(playbackState)
-        if (playbackState == Player.STATE_READY) {
-            _duration = exoPlayer.duration
-            listener?.onDurationChanged(duration)
+        when (playbackState) {
+            Player.STATE_IDLE -> {
+                onAudioStateChanged(AudioPlayerState.READY)
+            }
+
+            Player.STATE_BUFFERING -> {
+                onAudioStateChanged(AudioPlayerState.BUFFERING)
+            }
+
+            Player.STATE_READY -> {
+                _duration = exoPlayer.duration
+                listener?.onDurationChanged(duration)
+                onAudioStateChanged(AudioPlayerState.READY)
+            }
+
+            Player.STATE_ENDED -> {
+                onAudioStateChanged(AudioPlayerState.ENDED)
+            }
         }
+    }
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+        super.onIsPlayingChanged(isPlaying)
+        if (isPlaying) {
+            onAudioStateChanged(AudioPlayerState.PLAYING)
+        }
+    }
+
+    private fun onAudioStateChanged(state: AudioPlayerState) {
+        if (_audioPlayerState != state) {
+            Log.d(
+                this::class.java.simpleName,
+                "Medx-LOG %%% - audio state changed from $_audioPlayerState into $state"
+            )
+            _audioPlayerState = state
+            listener?.onPlayerStateChanged(state)
+        }
+    }
+
+    override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+        super.onMediaMetadataChanged(mediaMetadata)
+        listener?.onMediaMetadataChanged(mediaMetadata)
     }
 
     interface Listener {
@@ -157,5 +261,6 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
         fun onPlayerStateChanged(state: AudioPlayerState) {}
         fun onDurationChanged(duration: Long) {}
         fun onPositionChanged(position: Long) {}
+        fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {}
     }
 }

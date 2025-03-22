@@ -48,6 +48,11 @@ class AppAudioPlayerServiceV2 : BaseMedxAudioPlayerService() {
         updateNotification()
     }
 
+    override fun onPlayerStateChanged(state: AudioPlayerState) {
+        super.onPlayerStateChanged(state)
+        updateNotification()
+    }
+
 
     private fun updateNotification(){
         if(mediaSession == null) return
@@ -63,8 +68,8 @@ class AppAudioPlayerServiceV2 : BaseMedxAudioPlayerService() {
             applicationContext,
             notificationId = notificationId,
             playbackStateCompat = playbackStateCompat,
-            title = mediaItem.mediaMetadata.title?.toString() ?: "-",
-            artist = mediaItem.mediaMetadata.artist?.toString() ?: "-",
+            title = mediaMetadata.title?.toString() ?: "-",
+            artist = mediaMetadata.artist?.toString() ?: "-",
             position = position,
             duration = duration,
             mediaSession = mediaSession!!
