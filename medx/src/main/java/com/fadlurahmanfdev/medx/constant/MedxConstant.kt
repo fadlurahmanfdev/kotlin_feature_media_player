@@ -13,6 +13,8 @@ object MedxConstant {
         "com.fadlurahmanfdev.medx.ACTION_SKIP_TO_NEXT_AUDIO"
     const val ACTION_SEEK_TO_POSITION_AUDIO =
         "com.fadlurahmanfdev.medx.ACTION_SEEK_TO_POSITION_AUDIO"
+    const val ACTION_NONE =
+        "com.fadlurahmanfdev.medx.ACTION_NONE"
 
     const val PARAM_ARTIST = "PARAM_ARTIST"
     const val PARAM_CHANNEL = "PARAM_CHANNEL"
@@ -30,4 +32,6 @@ object MedxConstant {
     const val ACTION_AUDIO_STATE_INFO = "com.fadlurahmanfdev.medx.ACTION_AUDIO_STATE_INFO"
     const val ACTION_AUDIO_MEDIA_META_DATA_INFO =
         "com.fadlurahmanfdev.medx.ACTION_AUDIO_MEDIA_META_DATA_INFO"
+    const val ACTION_SEND_EVENT =
+        "com.fadlurahmanfdev.medx.ACTION_SEND_EVENT"
 }

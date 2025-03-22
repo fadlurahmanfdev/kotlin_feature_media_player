@@ -8,31 +8,16 @@
 
     <application>
         <receiver
-            android:name="com.fadlurahmanfdev.medx.domain.receiver.FeatureAudioPlayerReceiver"
+            android:name="com.fadlurahmanfdev.medx.domain.receiver.BaseMedxAudioPlayerReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PAUSE_AUDIO" />
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_RESUME_AUDIO" />
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PREVIOUS_AUDIO" />
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_NEXT_AUDIO" />
-                <action android:name="co.id.fadlurahmanfdev.feature_media_player.ACTION_SEEK_TO_POSITION" />
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.SEND_INFO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_NEXT_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SEEK_TO_POSITION_AUDIO" />
             </intent-filter>
         </receiver>
-
-        <service
-            android:name="com.fadlurahmanfdev.medx.domain.service.FeatureAudioPlayerService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PLAY_REMOTE_AUDIO" />
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PAUSE_AUDIO" />
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_RESUME_AUDIO" />
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_PREVIOUS_AUDIO" />
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.ACTION_NEXT_AUDIO" />
-                <action android:name="co.id.fadlurahmanfdev.feature_media_player.ACTION_SEEK_TO_POSITION" />
-                <action android:name="co.id.fadlurahmanfdev.kotlin_feature_media_player.SEND_INFO" />
-            </intent-filter>
-        </service>
         <service
             android:name="com.fadlurahmanfdev.medx.domain.service.BaseMedxAudioPlayerService"
             android:exported="false">

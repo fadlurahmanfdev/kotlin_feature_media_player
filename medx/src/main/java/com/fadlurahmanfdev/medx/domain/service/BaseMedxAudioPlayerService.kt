@@ -199,9 +199,9 @@ abstract class BaseMedxAudioPlayerService : Service(), BaseMedxAudioPlayerV2.Lis
 
     @OptIn(UnstableApi::class)
     override fun onDestroy() {
-//        audioPlayer.destroy()
         mediaSession?.release()
         mediaSession = null
+        audioPlayer.release()
         super.onDestroy()
     }
 

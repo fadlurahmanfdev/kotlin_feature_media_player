@@ -24,12 +24,6 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
         ),
         FeatureModel(
             featureIcon = R.drawable.baseline_developer_mode_24,
-            title = "Play Music",
-            desc = "Play remote music",
-            enum = "PLAY_REMOTE_MUSIC"
-        ),
-        FeatureModel(
-            featureIcon = R.drawable.baseline_developer_mode_24,
             title = "Play Music V2",
             desc = "Play remote music V2",
             enum = "PLAY_REMOTE_MUSIC_V2"
@@ -73,11 +67,6 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
         when (item.enum) {
             "CREATE_MEDIA_CHANNEL" -> {
                 viewModel.createChannel()
-            }
-
-            "PLAY_REMOTE_MUSIC" -> {
-                val intent = Intent(this, RemoteMusicPlayerActivity::class.java)
-                startActivity(intent)
             }
 
             "PLAY_REMOTE_MUSIC_V2" -> {

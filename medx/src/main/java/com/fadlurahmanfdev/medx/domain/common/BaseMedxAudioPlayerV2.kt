@@ -154,7 +154,7 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
     }
 
     fun pause() {
-        if (_audioPlayerState == AudioPlayerState.PLAYING) {
+        if (state == AudioPlayerState.PLAYING) {
             handler.removeCallbacks(audioPositionRunnable)
             exoPlayer.pause()
             onAudioStateChanged(AudioPlayerState.PAUSED)
@@ -162,7 +162,7 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
     }
 
     fun resume() {
-        if (_audioPlayerState == AudioPlayerState.PAUSED) {
+        if (state == AudioPlayerState.PAUSED) {
             exoPlayer.play()
             onAudioStateChanged(AudioPlayerState.PLAYING)
             handler.postDelayed(audioPositionRunnable, 500)
@@ -170,11 +170,19 @@ open class BaseMedxAudioPlayerV2(private val context: Context) : Player.Listener
     }
 
     fun stop() {
-        if (_audioPlayerState == AudioPlayerState.PLAYING || _audioPlayerState == AudioPlayerState.STOPPED) {
+        if (state == AudioPlayerState.PLAYING || state == AudioPlayerState.STOPPED) {
             handler.removeCallbacks(audioPositionRunnable)
             exoPlayer.stop()
             onAudioStateChanged(AudioPlayerState.STOPPED)
         }
+    }
+
+    fun release() {
+        if (state != AudioPlayerState.STOPPED) {
+            stop()
+        }
+        mediaSession.release()
+        exoPlayer.release()
     }
 
     fun skipToPreviousItem() {

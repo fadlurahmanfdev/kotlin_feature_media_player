@@ -16,7 +16,6 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2
-import com.fadlurahmanfdev.medx.MedxAudioPlayer
 import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
 import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState
 import com.fadlurahmanfdev.medx.data.enums.AudioPlayerState.BUFFERING
@@ -77,15 +76,14 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
         ivPlay.setOnClickListener {
             when (audioState) {
                 PLAYING -> {
-                    MedxAudioPlayer.pause(
+                    MedxAudioPlayerManager.pause(
                         this,
-                        notificationId = 1,
                         AppAudioPlayerServiceV2::class.java
                     )
                 }
 
                 PAUSED -> {
-                    MedxAudioPlayer.resume(
+                    MedxAudioPlayerManager.resume(
                         this,
                         notificationId = 1,
                         AppAudioPlayerServiceV2::class.java
@@ -99,11 +97,11 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
         }
 
         ivPrevious.setOnClickListener {
-            MedxAudioPlayer.skipToPrevious(context = this, AppAudioPlayerServiceV2::class.java)
+            MedxAudioPlayerManager.skipToPrevious(context = this, AppAudioPlayerServiceV2::class.java)
         }
 
         ivNext.setOnClickListener {
-            MedxAudioPlayer.skipToNext(context = this, AppAudioPlayerServiceV2::class.java)
+            MedxAudioPlayerManager.skipToNext(context = this, AppAudioPlayerServiceV2::class.java)
         }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -113,7 +111,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
                         this@RemoteMusicPlayerActivityV2::class.java.simpleName,
                         "on progress changed: $progress"
                     )
-                    MedxAudioPlayer.seekToPosition(
+                    MedxAudioPlayerManager.seekToPosition(
                         this@RemoteMusicPlayerActivityV2,
                         progress.toLong(),
                         AppAudioPlayerServiceV2::class.java
@@ -136,7 +134,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
         medxAudioPlayerManager.addListener(this)
 
 
-        MedxAudioPlayer.playRemoteAudio(
+        MedxAudioPlayerManager.playRemoteAudio(
             this,
             notificationId = 1,
             mediaItems = audios,

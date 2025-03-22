@@ -5,9 +5,9 @@ import android.content.Context
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.fadlurahmanfdev.example.R
-import com.fadlurahmanfdev.example.domain.receiver.ExampleAudioPlayerReceiver
+import com.fadlurahmanfdev.example.domain.receiver.AppAudioPlayerReceiverV2
+import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
 import com.fadlurahmanfdev.medx.data.dto.model.MediaNotificationActionModel
-import com.fadlurahmanfdev.medx.domain.manager.FeatureAudioPlayerManager
 import com.fadlurahmanfdev.medx.data.repository.BaseAudioNotificationRepository
 
 class ExampleAudioNotificationRepositoryImpl(context: Context) :
@@ -37,10 +37,10 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                     MediaNotificationActionModel(
                         icon = R.drawable.baseline_skip_previous_24,
                         title = "Previous",
-                        pendingIntent = FeatureAudioPlayerManager.getPreviousPendingIntent(
+                        pendingIntent = MedxAudioPlayerManager.getSkipToPreviousAudioPendingIntent(
                             context,
-                            notificationId = notificationId,
-                            ExampleAudioPlayerReceiver::class.java
+                            1,
+                            AppAudioPlayerReceiverV2::class.java
                         )
                     )
                 )
@@ -49,9 +49,9 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                     MediaNotificationActionModel(
                         icon = R.drawable.baseline_skip_previous_24,
                         title = "Previous",
-                        pendingIntent = FeatureAudioPlayerManager.getNonePendingIntent(
+                        pendingIntent = MedxAudioPlayerManager.getNonePendingIntent(
                             context,
-                            ExampleAudioPlayerReceiver::class.java
+                            AppAudioPlayerReceiverV2::class.java
                         )
                     )
                 )
@@ -62,10 +62,10 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                     MediaNotificationActionModel(
                         icon = R.drawable.baseline_pause_24,
                         title = "Pause",
-                        pendingIntent = FeatureAudioPlayerManager.getPausePendingIntent(
+                        pendingIntent = MedxAudioPlayerManager.getPauseAudioPendingIntent(
                             context,
-                            notificationId = notificationId,
-                            ExampleAudioPlayerReceiver::class.java
+                            2,
+                            AppAudioPlayerReceiverV2::class.java
                         )
                     )
                 )
@@ -74,10 +74,11 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                     MediaNotificationActionModel(
                         icon = R.drawable.baseline_play_arrow_24,
                         title = "Resume",
-                        pendingIntent = FeatureAudioPlayerManager.getResumePendingIntent(
+                        pendingIntent = MedxAudioPlayerManager.getResumePendingIntent(
                             context,
-                            notificationId = notificationId,
-                            ExampleAudioPlayerReceiver::class.java
+                            requestCode = 3,
+                            notificationId = 1,
+                            AppAudioPlayerReceiverV2::class.java
                         )
                     )
                 )
@@ -86,10 +87,11 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                     MediaNotificationActionModel(
                         icon = R.drawable.baseline_play_arrow_24,
                         title = "Replay",
-                        pendingIntent = FeatureAudioPlayerManager.getResumePendingIntent(
+                        pendingIntent = MedxAudioPlayerManager.getResumePendingIntent(
                             context,
-                            notificationId = notificationId,
-                            ExampleAudioPlayerReceiver::class.java
+                            requestCode = 3,
+                            notificationId = 1,
+                            AppAudioPlayerReceiverV2::class.java
                         )
                     )
                 )
@@ -98,9 +100,9 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                     MediaNotificationActionModel(
                         icon = R.drawable.baseline_play_arrow_24,
                         title = "Play",
-                        pendingIntent = FeatureAudioPlayerManager.getNonePendingIntent(
+                        pendingIntent = MedxAudioPlayerManager.getNonePendingIntent(
                             context,
-                            ExampleAudioPlayerReceiver::class.java
+                            AppAudioPlayerReceiverV2::class.java
                         )
                     )
                 )
@@ -111,10 +113,10 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                     MediaNotificationActionModel(
                         icon = R.drawable.baseline_skip_next_24,
                         title = "Next",
-                        pendingIntent = FeatureAudioPlayerManager.getNextPendingIntent(
+                        pendingIntent = MedxAudioPlayerManager.getSkipToNextAudioPendingIntent(
                             context,
-                            notificationId = notificationId,
-                            ExampleAudioPlayerReceiver::class.java
+                            requestCode = 4,
+                            AppAudioPlayerReceiverV2::class.java
                         )
                     )
                 )
@@ -123,9 +125,9 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                     MediaNotificationActionModel(
                         icon = R.drawable.baseline_skip_next_24,
                         title = "Next",
-                        pendingIntent = FeatureAudioPlayerManager.getNonePendingIntent(
+                        pendingIntent = MedxAudioPlayerManager.getNonePendingIntent(
                             context,
-                            ExampleAudioPlayerReceiver::class.java
+                            AppAudioPlayerReceiverV2::class.java
                         )
                     )
                 )
@@ -141,11 +143,11 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
             duration = duration,
             actions = actions,
             onSeekToPosition = { positionSeekTo ->
-                FeatureAudioPlayerManager.sendBroadcastSeekToPosition(
+                MedxAudioPlayerManager.sendBroadcastSeekToPosition(
                     context,
                     position = positionSeekTo,
                     notificationId = notificationId,
-                    clazz = ExampleAudioPlayerReceiver::class.java,
+                    clazz = AppAudioPlayerReceiverV2::class.java,
                 )
             },
             mediaSession = mediaSession,
