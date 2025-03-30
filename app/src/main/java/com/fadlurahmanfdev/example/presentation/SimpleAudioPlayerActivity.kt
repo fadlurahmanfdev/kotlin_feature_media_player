@@ -16,15 +16,12 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
-import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2
-import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
+import com.fadlurahmanfdev.medx.MedxAudioPlayer
+import com.fadlurahmanfdev.medx.base.IMedxAudioPlayerListener
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
-import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.BUFFERING
-import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.PAUSED
-import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.PLAYING
 
-class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlayerManager.Listener {
-    lateinit var medxAudioPlayerManager: MedxAudioPlayerManager
+class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxAudioPlayerListener {
+    lateinit var medxAudioPlayer: MedxAudioPlayer
 
     lateinit var seekBar: SeekBar
 
@@ -56,6 +53,9 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
             insets
         }
 
+        medxAudioPlayer = MedxAudioPlayer(this)
+        medxAudioPlayer.initialize()
+
         mediaItems = listOf(
             MediaItem.Builder()
                 .setUri(Uri.parse("https://www.bensound.com/bensound-music/bensound-acousticbreeze.mp3"))
@@ -82,19 +82,12 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
 
         ivPlay.setOnClickListener {
             when (audioState) {
-                PLAYING -> {
-                    MedxAudioPlayerManager.pause(
-                        this,
-                        AppAudioPlayerServiceV2::class.java
-                    )
+                MedxAudioPlayerState.PLAYING -> {
+                    medxAudioPlayer.pause()
                 }
 
-                PAUSED -> {
-                    MedxAudioPlayerManager.resume(
-                        this,
-                        notificationId = 1,
-                        AppAudioPlayerServiceV2::class.java
-                    )
+                MedxAudioPlayerState.PAUSED -> {
+                    medxAudioPlayer.resume()
                 }
 
                 else -> {
@@ -104,28 +97,21 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
         }
 
         ivPrevious.setOnClickListener {
-            MedxAudioPlayerManager.skipToPrevious(
-                context = this,
-                AppAudioPlayerServiceV2::class.java
-            )
+            medxAudioPlayer.skipToPreviousMediaItem()
         }
 
         ivNext.setOnClickListener {
-            MedxAudioPlayerManager.skipToNext(context = this, AppAudioPlayerServiceV2::class.java)
+            medxAudioPlayer.skipToNextMediaItem()
         }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     Log.d(
-                        this@ForegroundServiceAudioPlayerActivity::class.java.simpleName,
+                        this@SimpleAudioPlayerActivity::class.java.simpleName,
                         "on progress changed: $progress"
                     )
-                    MedxAudioPlayerManager.seekToPosition(
-                        this@ForegroundServiceAudioPlayerActivity,
-                        progress.toLong(),
-                        AppAudioPlayerServiceV2::class.java
-                    )
+                    medxAudioPlayer.seekToPosition(progress.toLong())
                 }
             }
 
@@ -139,37 +125,22 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
 
         })
 
-        medxAudioPlayerManager = MedxAudioPlayerManager(this)
-        medxAudioPlayerManager.registerReceiver(this)
-        medxAudioPlayerManager.addListener(this)
+        medxAudioPlayer.addListener(this)
 
-
-        MedxAudioPlayerManager.playAudio(
-            this,
-            notificationId = 1,
-            mediaItems = mediaItems,
-            AppAudioPlayerServiceV2::class.java
-        )
+        medxAudioPlayer.playAudio(mediaItems)
     }
 
-    @UnstableApi
     override fun onDestroy() {
         super.onDestroy()
+        medxAudioPlayer.stop()
+        medxAudioPlayer.release()
     }
 
-    override fun onReceiveInfoDuration(duration: Long) {
-        Log.d(this::class.java.simpleName, "Medx-LOG %%% - receive info duration: $duration")
-        seekBar.max = duration.toInt()
-    }
-
-    override fun onReceiveInfoPosition(position: Long) {
-        seekBar.progress = position.toInt()
-    }
-
-    override fun onReceiveInfoState(state: MedxAudioPlayerState) {
+    override fun onPlayerStateChanged(state: MedxAudioPlayerState) {
+        super.onPlayerStateChanged(state)
         audioState = state
         when (state) {
-            BUFFERING, PLAYING -> {
+            MedxAudioPlayerState.BUFFERING, MedxAudioPlayerState.PLAYING -> {
                 ivPlay.setImageDrawable(
                     ContextCompat.getDrawable(
                         this,
@@ -191,9 +162,24 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
         Log.d(this::class.java.simpleName, "Medx-LOG %%% - receive info state: $state")
     }
 
-    override fun onReceiveInfoMediaMetaData(mediaMetadata: MediaMetadata) {
+    override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+        super.onMediaMetadataChanged(mediaMetadata)
         tvTitle.text = mediaMetadata.title
         tvArtist.text = mediaMetadata.artist
+    }
 
+    override fun onDurationChanged(duration: Long) {
+        super.onDurationChanged(duration)
+        seekBar.max = duration.toInt()
+    }
+
+    override fun onPositionChanged(position: Long) {
+        super.onPositionChanged(position)
+        seekBar.progress = position.toInt()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        medxAudioPlayer.pause()
     }
 }

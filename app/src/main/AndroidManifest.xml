@@ -20,6 +20,9 @@
             android:name=".presentation.ForegroundServiceAudioPlayerActivity"
             android:exported="false" />
         <activity
+            android:name=".presentation.SimpleAudioPlayerActivity"
+            android:exported="false" />
+        <activity
             android:name=".presentation.MainActivity"
             android:exported="true">
             <intent-filter>

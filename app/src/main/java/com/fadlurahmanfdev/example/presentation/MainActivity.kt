@@ -24,9 +24,15 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
         ),
         FeatureModel(
             featureIcon = R.drawable.baseline_developer_mode_24,
-            title = "Play Audio From Foreground Service",
-            desc = "Play Audio From Foreground Service",
-            enum = "PLAY_AUDIO_FOREGROUND_SERVICE"
+            title = "Simple Audio Player",
+            desc = "Simple Audio Player",
+            enum = "SIMPLE_AUDIO_PLAYER"
+        ),
+        FeatureModel(
+            featureIcon = R.drawable.baseline_developer_mode_24,
+            title = "Foreground Service Audio Player",
+            desc = "Foreground Service Audio Player",
+            enum = "FOREGROUND_SERVICE_AUDIO_PLAYER"
         ),
     )
 
@@ -69,7 +75,12 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
                 viewModel.createChannel()
             }
 
-            "PLAY_AUDIO_FOREGROUND_SERVICE" -> {
+            "SIMPLE_AUDIO_PLAYER" -> {
+                val intent = Intent(this, SimpleAudioPlayerActivity::class.java)
+                startActivity(intent)
+            }
+
+            "FOREGROUND_SERVICE_AUDIO_PLAYER" -> {
                 val intent = Intent(this, ForegroundServiceAudioPlayerActivity::class.java)
                 startActivity(intent)
             }
