@@ -3,6 +3,7 @@ package com.fadlurahmanfdev.medx
 import android.content.Context
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.RawResourceDataSource
@@ -12,6 +13,15 @@ import com.fadlurahmanfdev.medx.base.IMedxAudioResourceManager
 import com.fadlurahmanfdev.medx.utilities.MedxCacheUtilities
 
 class MedxAudioResourceManager : IMedxAudioResourceManager {
+    /**
+     * Create Default Datasource Factory.
+     *
+     * Used for performing audio player from default datasource.
+     * */
+    override fun defaultDatasourceFactory(context: Context): DefaultDataSource.Factory {
+        return DefaultDataSource.Factory(context)
+    }
+
     /**
      * Create HTTP Datasource Factory.
      *
@@ -31,6 +41,11 @@ class MedxAudioResourceManager : IMedxAudioResourceManager {
         return FileDataSource.Factory()
     }
 
+    /**
+     * Create Raw Datasource Factory.
+     *
+     * Used for performing audio player from raw resource/directory
+     * */
     @UnstableApi
     override fun rawDatasourceFactory(context: Context): DataSource.Factory {
         return DataSource.Factory { RawResourceDataSource(context) }

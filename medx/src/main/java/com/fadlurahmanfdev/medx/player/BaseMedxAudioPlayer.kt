@@ -106,31 +106,44 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
         val mediaSources = arrayListOf<MediaSource>()
         repeat(mediaItems.size) { index ->
             val mediaItem = mediaItems[index]
-            Log.d(
-                this::class.java.simpleName,
-                "Medx-LOG %%% scheme: ${mediaItem.localConfiguration?.uri?.scheme}"
-            )
+            val dataSourceFactory: DataSource.Factory
+            val mediaSource: MediaSource
             when (mediaItem.localConfiguration?.uri?.scheme) {
                 "http", "https" -> {
-                    val dataSourceFactory: DataSource.Factory =
+                    dataSourceFactory =
                         medxAudioResourceManager.httpDatasourceFactory()
                     val cacheDataSourceFactory =
                         medxAudioResourceManager.cacheDatasourceFactory(context, dataSourceFactory)
-                    val mediaSource: MediaSource =
+                    mediaSource =
                         ProgressiveMediaSource.Factory(cacheDataSourceFactory)
                             .createMediaSource(mediaItem)
-                    mediaSources.add(mediaSource)
                 }
 
                 "android.resource" -> {
-                    val dataSourceFactory: DataSource.Factory =
+                    dataSourceFactory =
                         medxAudioResourceManager.rawDatasourceFactory(context)
-                    val mediaSource: MediaSource =
+                    mediaSource =
                         ProgressiveMediaSource.Factory(dataSourceFactory)
                             .createMediaSource(mediaItem)
-                    mediaSources.add(mediaSource)
+                }
+
+                "file" -> {
+                    dataSourceFactory =
+                        medxAudioResourceManager.fileDatasourceFactory()
+                    mediaSource =
+                        ProgressiveMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(mediaItem)
+                }
+
+                else -> {
+                    dataSourceFactory =
+                        medxAudioResourceManager.defaultDatasourceFactory(context)
+                    mediaSource =
+                        ProgressiveMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(mediaItem)
                 }
             }
+            mediaSources.add(mediaSource)
         }
         exoPlayer.setMediaSources(mediaSources)
         exoPlayer.playWhenReady = true

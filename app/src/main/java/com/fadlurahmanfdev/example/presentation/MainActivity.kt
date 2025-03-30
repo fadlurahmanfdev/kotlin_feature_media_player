@@ -30,6 +30,12 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
         ),
         FeatureModel(
             featureIcon = R.drawable.baseline_developer_mode_24,
+            title = "Simple Audio Player For Audio File",
+            desc = "Simple Audio Player For Audio File",
+            enum = "SIMPLE_AUDIO_PLAYER_FOR_AUDIO_FILE"
+        ),
+        FeatureModel(
+            featureIcon = R.drawable.baseline_developer_mode_24,
             title = "Foreground Service Audio Player",
             desc = "Foreground Service Audio Player",
             enum = "FOREGROUND_SERVICE_AUDIO_PLAYER"
@@ -77,6 +83,11 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
 
             "SIMPLE_AUDIO_PLAYER" -> {
                 val intent = Intent(this, SimpleAudioPlayerActivity::class.java)
+                startActivity(intent)
+            }
+
+            "SIMPLE_AUDIO_PLAYER_FOR_AUDIO_FILE" -> {
+                val intent = Intent(this, SimpleAudioPlayerForAudioFileActivity::class.java)
                 startActivity(intent)
             }
 
