@@ -5,6 +5,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
+import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.datasource.cache.CacheDataSink
 import androidx.media3.datasource.cache.CacheDataSource
 import com.fadlurahmanfdev.medx.base.IMedxAudioResourceManager
@@ -25,8 +26,14 @@ class MedxAudioResourceManager : IMedxAudioResourceManager {
      *
      * Used for performing audio player from device file.
      * */
+    @UnstableApi
     override fun fileDatasourceFactory(): FileDataSource.Factory {
         return FileDataSource.Factory()
+    }
+
+    @UnstableApi
+    override fun rawDatasourceFactory(context: Context): DataSource.Factory {
+        return DataSource.Factory { RawResourceDataSource(context) }
     }
 
     /**
@@ -34,6 +41,7 @@ class MedxAudioResourceManager : IMedxAudioResourceManager {
      *
      * Used for performing audio player cached from previous player.
      * */
+    @UnstableApi
     override fun cacheDatasourceFactory(
         context: Context,
         dataSourceFactory: DataSource.Factory

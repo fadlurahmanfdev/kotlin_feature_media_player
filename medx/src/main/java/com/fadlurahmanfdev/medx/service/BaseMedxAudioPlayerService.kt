@@ -84,7 +84,7 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
             "Medx-LOG %%% - MedxAudioPlayerService on start command ${intent?.action}"
         )
         when (intent?.action) {
-            MedxConstant.ACTION_PLAY_REMOTE_AUDIO -> onStartCommandPlayRemoteAudio(intent)
+            MedxConstant.ACTION_PLAY_AUDIO -> onStartCommandPlayAudio(intent)
             MedxConstant.ACTION_PAUSE_AUDIO -> onStartCommandPauseAudio(intent)
             MedxConstant.ACTION_RESUME_AUDIO -> onStartCommandResumeAudio(intent)
             MedxConstant.ACTION_SKIP_TO_PREVIOUS_AUDIO -> onStartCommandSkipToPreviousAudio(intent)
@@ -97,14 +97,14 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
     /**
      * Handle service when command play remote audio.
      * */
-    open fun onStartCommandPlayRemoteAudio(intent: Intent) {
+    open fun onStartCommandPlayAudio(intent: Intent) {
         val mediaItems: List<MediaItem> = getMediaItems(intent)
 
         // throw if the mediaItems empty
         if (mediaItems.isEmpty()) {
             Log.e(
                 this::class.java.simpleName,
-                "Medx-LOG %%% - cannot play remote audio, the list of  media item is missing"
+                "Medx-LOG %%% - cannot play audio, the list of  media item is missing"
             )
             throw MedxErrorConstant.MEDIA_ITEM_MISSING
         }
@@ -119,7 +119,7 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
 
         this.mediaItems = mediaItems
 
-        audioPlayer.playHttpAudio(mediaItems)
+        audioPlayer.playAudio(mediaItems)
 
         idleAudioNotification(
             notificationId = notificationId,

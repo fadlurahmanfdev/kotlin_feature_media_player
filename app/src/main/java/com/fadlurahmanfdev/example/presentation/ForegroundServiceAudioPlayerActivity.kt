@@ -1,5 +1,6 @@
 package com.fadlurahmanfdev.example.presentation
 
+import android.content.ContentResolver
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -22,7 +23,7 @@ import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.BUFFERING
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.PAUSED
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.PLAYING
 
-class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.Listener {
+class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlayerManager.Listener {
     lateinit var medxAudioPlayerManager: MedxAudioPlayerManager
 
     lateinit var seekBar: SeekBar
@@ -42,7 +43,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_remote_music_player)
+        setContentView(R.layout.activity_audio_player)
         seekBar = findViewById(R.id.seekbar)
         tvTitle = findViewById(R.id.tv_title)
         tvArtist = findViewById(R.id.tv_artist)
@@ -66,7 +67,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
                 )
                 .build(),
             MediaItem.Builder()
-                .setUri(Uri.parse("https://www.bensound.com/bensound-music/bensound-creativeminds.mp3"))
+                .setUri(Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).path(R.raw.bensound_creativeminds.toString()).build())
                 .setMediaMetadata(
                     MediaMetadata.Builder().setTitle("Creative Minds").setArtist("Bensound")
                         .setArtworkUri(Uri.parse("https://www.bensound.com/bensound-img/creativeminds.jpg"))
@@ -117,11 +118,11 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     Log.d(
-                        this@RemoteMusicPlayerActivityV2::class.java.simpleName,
+                        this@ForegroundServiceAudioPlayerActivity::class.java.simpleName,
                         "on progress changed: $progress"
                     )
                     MedxAudioPlayerManager.seekToPosition(
-                        this@RemoteMusicPlayerActivityV2,
+                        this@ForegroundServiceAudioPlayerActivity,
                         progress.toLong(),
                         AppAudioPlayerServiceV2::class.java
                     )
@@ -143,7 +144,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
         medxAudioPlayerManager.addListener(this)
 
 
-        MedxAudioPlayerManager.playRemoteAudio(
+        MedxAudioPlayerManager.playAudio(
             this,
             notificationId = 1,
             mediaItems = audios,

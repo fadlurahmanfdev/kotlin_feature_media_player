@@ -20,7 +20,7 @@ import com.fadlurahmanfdev.medx.service.BaseMedxAudioPlayerService
 class MedxAudioPlayerManager(val context: Context) {
     companion object {
         @UnstableApi
-        fun <T : BaseMedxAudioPlayerService> playRemoteAudio(
+        fun <T : BaseMedxAudioPlayerService> playAudio(
             context: Context,
             notificationId: Int,
             mediaItems: List<MediaItem>,
@@ -31,7 +31,7 @@ class MedxAudioPlayerManager(val context: Context) {
                 mediaItem.toBundleIncludeLocalConfiguration()
             }.toList())
             intent.apply {
-                action = MedxConstant.ACTION_PLAY_REMOTE_AUDIO
+                action = MedxConstant.ACTION_PLAY_AUDIO
                 putExtra(MedxConstant.PARAM_NOTIFICATION_ID, notificationId)
                 putExtra(MedxConstant.PARAM_MEDIA_ITEMS, bundleMediaItems)
             }

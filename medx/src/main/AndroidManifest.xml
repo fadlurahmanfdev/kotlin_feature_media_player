@@ -22,7 +22,7 @@
             android:name="com.fadlurahmanfdev.medx.service.BaseMedxAudioPlayerService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_REMOTE_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO" />

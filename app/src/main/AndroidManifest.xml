@@ -17,7 +17,7 @@
         android:theme="@style/Theme.Kotlin_feature_media_player"
         tools:targetApi="31">
         <activity
-            android:name=".presentation.RemoteMusicPlayerActivityV2"
+            android:name=".presentation.ForegroundServiceAudioPlayerActivity"
             android:exported="false" />
         <activity
             android:name=".presentation.MainActivity"
@@ -44,7 +44,7 @@
             android:name=".domain.service.AppAudioPlayerServiceV2"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_REMOTE_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO" />

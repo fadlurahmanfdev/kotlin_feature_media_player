@@ -1,8 +1,8 @@
 package com.fadlurahmanfdev.medx.constant
 
 object MedxConstant {
-    const val ACTION_PLAY_REMOTE_AUDIO =
-        "com.fadlurahmanfdev.medx.ACTION_PLAY_REMOTE_AUDIO"
+    const val ACTION_PLAY_AUDIO =
+        "com.fadlurahmanfdev.medx.ACTION_PLAY_AUDIO"
     const val ACTION_PAUSE_AUDIO =
         "com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO"
     const val ACTION_RESUME_AUDIO =

@@ -24,9 +24,9 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
         ),
         FeatureModel(
             featureIcon = R.drawable.baseline_developer_mode_24,
-            title = "Play Music V2",
-            desc = "Play remote music V2",
-            enum = "PLAY_REMOTE_MUSIC_V2"
+            title = "Play Audio From Foreground Service",
+            desc = "Play Audio From Foreground Service",
+            enum = "PLAY_AUDIO_FOREGROUND_SERVICE"
         ),
     )
 
@@ -69,8 +69,8 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
                 viewModel.createChannel()
             }
 
-            "PLAY_REMOTE_MUSIC_V2" -> {
-                val intent = Intent(this, RemoteMusicPlayerActivityV2::class.java)
+            "PLAY_AUDIO_FOREGROUND_SERVICE" -> {
+                val intent = Intent(this, ForegroundServiceAudioPlayerActivity::class.java)
                 startActivity(intent)
             }
         }

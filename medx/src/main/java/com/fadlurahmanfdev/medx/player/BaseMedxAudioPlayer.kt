@@ -4,9 +4,11 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
@@ -21,6 +23,7 @@ import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
 abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPlayer,
     Player.Listener {
     override var _duration: Long = 0L
+
     /**
      * Duration of audio.
      *
@@ -30,6 +33,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
     override val duration: Long
         get() = _duration
     override var _position: Long = 0L
+
     /**
      * Position of currently audio playing.
      *
@@ -41,6 +45,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
 
 
     override var _medxAudioPlayerState: MedxAudioPlayerState = MedxAudioPlayerState.IDLE
+
     /**
      * The player state of audio player (e.g., [MedxAudioPlayerState.IDLE], [MedxAudioPlayerState.PLAYING], [MedxAudioPlayerState.BUFFERING], etc).
      *
@@ -78,14 +83,14 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
     /**
      * Listening audio position changed every n seconds.
      * */
-    open fun listenAudioPosition(){
+    open fun listenAudioPosition() {
         handler.postDelayed(audioPositionRunnable, 250)
     }
 
     /**
      * Remove listener audio position changed every n seconds.
      * */
-    fun removeListenerAudioPosition(){
+    fun removeListenerAudioPosition() {
         handler.removeCallbacks(audioPositionRunnable)
     }
 
@@ -96,16 +101,36 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
      *
      * @see [MedxAudioResourceManager.httpDatasourceFactory]
      * */
-    override fun playHttpAudio(mediaItems: List<MediaItem>) {
-        val dataSourceFactory: DataSource.Factory = medxAudioResourceManager.httpDatasourceFactory()
-        val cacheDataSourceFactory =
-            medxAudioResourceManager.cacheDatasourceFactory(context, dataSourceFactory)
+    @OptIn(UnstableApi::class)
+    override fun playAudio(mediaItems: List<MediaItem>) {
         val mediaSources = arrayListOf<MediaSource>()
         repeat(mediaItems.size) { index ->
-            val mediaSource: MediaSource =
-                ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-                    .createMediaSource(mediaItems[index])
-            mediaSources.add(mediaSource)
+            val mediaItem = mediaItems[index]
+            Log.d(
+                this::class.java.simpleName,
+                "Medx-LOG %%% scheme: ${mediaItem.localConfiguration?.uri?.scheme}"
+            )
+            when (mediaItem.localConfiguration?.uri?.scheme) {
+                "http", "https" -> {
+                    val dataSourceFactory: DataSource.Factory =
+                        medxAudioResourceManager.httpDatasourceFactory()
+                    val cacheDataSourceFactory =
+                        medxAudioResourceManager.cacheDatasourceFactory(context, dataSourceFactory)
+                    val mediaSource: MediaSource =
+                        ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                            .createMediaSource(mediaItem)
+                    mediaSources.add(mediaSource)
+                }
+
+                "android.resource" -> {
+                    val dataSourceFactory: DataSource.Factory =
+                        medxAudioResourceManager.rawDatasourceFactory(context)
+                    val mediaSource: MediaSource =
+                        ProgressiveMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(mediaItem)
+                    mediaSources.add(mediaSource)
+                }
+            }
         }
         exoPlayer.setMediaSources(mediaSources)
         exoPlayer.playWhenReady = true

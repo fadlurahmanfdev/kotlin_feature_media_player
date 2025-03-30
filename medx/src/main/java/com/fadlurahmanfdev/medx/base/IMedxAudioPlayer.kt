@@ -29,7 +29,7 @@ interface IMedxAudioPlayer {
 
     fun removeListener()
 
-    fun playHttpAudio(mediaItems: List<MediaItem>)
+    fun playAudio(mediaItems: List<MediaItem>)
     fun pause()
     fun resume()
     fun stop()
