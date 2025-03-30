@@ -9,7 +9,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.data.dto.model.FeatureModel
-import com.fadlurahmanfdev.example.data.repository.ExampleAudioNotificationRepositoryImpl
+import com.fadlurahmanfdev.example.data.repository.AppMedxNotification
 import com.fadlurahmanfdev.example.domain.usecase.ExampleMediaPlayerUseCaseImpl
 
 class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
 
         viewModel = MainViewModel(
             exampleMediaPlayerUseCase = ExampleMediaPlayerUseCaseImpl(
-                exampleMediaNotificationRepository = ExampleAudioNotificationRepositoryImpl(
+                appMedxNotificationRepository = AppMedxNotification(
                     this
                 )
             )

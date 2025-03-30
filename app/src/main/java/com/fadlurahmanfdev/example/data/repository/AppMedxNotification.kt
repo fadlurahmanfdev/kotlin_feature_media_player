@@ -2,26 +2,35 @@ package com.fadlurahmanfdev.example.data.repository
 
 import android.app.Notification
 import android.content.Context
+import android.graphics.Bitmap
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.receiver.AppAudioPlayerReceiverV2
 import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
-import com.fadlurahmanfdev.medx.data.model.MediaNotificationActionModel
-import com.fadlurahmanfdev.medx.data.repository.BaseAudioNotificationRepository
+import com.fadlurahmanfdev.medx.notification.BaseMedxNotification
 
-class ExampleAudioNotificationRepositoryImpl(context: Context) :
-    BaseAudioNotificationRepository(context),
-    ExampleMediaNotificationRepository {
+class AppMedxNotification(context: Context) : BaseMedxNotification(context),
+    AppMedxNotificationRepository {
+    val appPushlyNotification = AppPushlyNotification(context)
+
     override fun createMediaNotificationChannel() {
-        super.createMediaNotificationChannel(
-            channelId = "MEDIA",
-            channelName = "Media",
-            channelDescription = "Notifikasi Media",
-        )
+        if (appPushlyNotification.isSupportedNotificationChannel()) {
+            appPushlyNotification.createNotificationChannel(
+                channelId = "MEDIA",
+                channelName = "Media",
+                channelDescription = "Notifikasi Media",
+                importance = NotificationManagerCompat.IMPORTANCE_DEFAULT,
+                sound = null,
+            )
+        }
     }
 
     override fun getMediaNotification(
+        albumArtBitmap: Bitmap?,
         context: Context,
         notificationId: Int,
         playbackStateCompat: Int,
@@ -31,13 +40,16 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
         duration: Long,
         mediaSession: MediaSessionCompat,
     ): Notification {
-        val actions = arrayListOf<MediaNotificationActionModel>().apply {
+        val actions = arrayListOf<NotificationCompat.Action>().apply {
             if (playbackStateCompat == PlaybackStateCompat.STATE_PLAYING) {
                 add(
-                    MediaNotificationActionModel(
-                        icon = R.drawable.baseline_skip_previous_24,
-                        title = "Previous",
-                        pendingIntent = MedxAudioPlayerManager.getSkipToPreviousAudioPendingIntent(
+                    NotificationCompat.Action(
+                        IconCompat.createWithResource(
+                            context,
+                            R.drawable.baseline_skip_previous_24
+                        ),
+                        "Previous",
+                        MedxAudioPlayerManager.getSkipToPreviousAudioPendingIntent(
                             context,
                             1,
                             AppAudioPlayerReceiverV2::class.java
@@ -46,10 +58,13 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                 )
             } else {
                 add(
-                    MediaNotificationActionModel(
-                        icon = R.drawable.baseline_skip_previous_24,
-                        title = "Previous",
-                        pendingIntent = MedxAudioPlayerManager.getNonePendingIntent(
+                    NotificationCompat.Action(
+                        IconCompat.createWithResource(
+                            context,
+                            R.drawable.baseline_skip_previous_24
+                        ),
+                        "Previous",
+                        MedxAudioPlayerManager.getNonePendingIntent(
                             context,
                             AppAudioPlayerReceiverV2::class.java
                         )
@@ -59,10 +74,10 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
 
             if (playbackStateCompat == PlaybackStateCompat.STATE_PLAYING) {
                 add(
-                    MediaNotificationActionModel(
-                        icon = R.drawable.baseline_pause_24,
-                        title = "Pause",
-                        pendingIntent = MedxAudioPlayerManager.getPauseAudioPendingIntent(
+                    NotificationCompat.Action(
+                        IconCompat.createWithResource(context, R.drawable.baseline_pause_24),
+                        "Pause",
+                        MedxAudioPlayerManager.getPauseAudioPendingIntent(
                             context,
                             2,
                             AppAudioPlayerReceiverV2::class.java
@@ -71,10 +86,10 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                 )
             } else if (playbackStateCompat == PlaybackStateCompat.STATE_PAUSED) {
                 add(
-                    MediaNotificationActionModel(
-                        icon = R.drawable.baseline_play_arrow_24,
-                        title = "Resume",
-                        pendingIntent = MedxAudioPlayerManager.getResumePendingIntent(
+                    NotificationCompat.Action(
+                        IconCompat.createWithResource(context, R.drawable.baseline_play_arrow_24),
+                        "Resume",
+                        MedxAudioPlayerManager.getResumePendingIntent(
                             context,
                             requestCode = 3,
                             notificationId = 1,
@@ -84,10 +99,10 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                 )
             } else if (playbackStateCompat == PlaybackStateCompat.STATE_STOPPED) {
                 add(
-                    MediaNotificationActionModel(
-                        icon = R.drawable.baseline_play_arrow_24,
-                        title = "Replay",
-                        pendingIntent = MedxAudioPlayerManager.getResumePendingIntent(
+                    NotificationCompat.Action(
+                        IconCompat.createWithResource(context, R.drawable.baseline_play_arrow_24),
+                        "Replay",
+                        MedxAudioPlayerManager.getResumePendingIntent(
                             context,
                             requestCode = 3,
                             notificationId = 1,
@@ -97,10 +112,10 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                 )
             } else {
                 add(
-                    MediaNotificationActionModel(
-                        icon = R.drawable.baseline_play_arrow_24,
-                        title = "Play",
-                        pendingIntent = MedxAudioPlayerManager.getNonePendingIntent(
+                    NotificationCompat.Action(
+                        IconCompat.createWithResource(context, R.drawable.baseline_play_arrow_24),
+                        "Play",
+                        MedxAudioPlayerManager.getNonePendingIntent(
                             context,
                             AppAudioPlayerReceiverV2::class.java
                         )
@@ -110,10 +125,10 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
 
             if (playbackStateCompat == PlaybackStateCompat.STATE_PLAYING) {
                 add(
-                    MediaNotificationActionModel(
-                        icon = R.drawable.baseline_skip_next_24,
-                        title = "Next",
-                        pendingIntent = MedxAudioPlayerManager.getSkipToNextAudioPendingIntent(
+                    NotificationCompat.Action(
+                        IconCompat.createWithResource(context, R.drawable.baseline_skip_next_24),
+                        "Next",
+                        MedxAudioPlayerManager.getSkipToNextAudioPendingIntent(
                             context,
                             requestCode = 4,
                             AppAudioPlayerReceiverV2::class.java
@@ -122,10 +137,10 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
                 )
             } else {
                 add(
-                    MediaNotificationActionModel(
-                        icon = R.drawable.baseline_skip_next_24,
-                        title = "Next",
-                        pendingIntent = MedxAudioPlayerManager.getNonePendingIntent(
+                    NotificationCompat.Action(
+                        IconCompat.createWithResource(context, R.drawable.baseline_skip_next_24),
+                        "Next",
+                        MedxAudioPlayerManager.getNonePendingIntent(
                             context,
                             AppAudioPlayerReceiverV2::class.java
                         )
@@ -134,6 +149,7 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
             }
         }
         return getBaseMediaNotification(
+            albumArtBitmap = albumArtBitmap,
             smallIcon = R.drawable.ic_launcher_foreground,
             channelId = "MEDIA",
             playbackStateCompat = playbackStateCompat,
@@ -155,6 +171,7 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
     }
 
     override fun updateMediaNotification(
+        albumArtBitmap: Bitmap?,
         context: Context,
         notificationId: Int,
         playbackStateCompat: Int,
@@ -165,7 +182,8 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
         mediaSession: MediaSessionCompat
     ) {
         val notification = getMediaNotification(
-            context,
+            albumArtBitmap = albumArtBitmap,
+            context = context,
             notificationId = notificationId,
             playbackStateCompat = playbackStateCompat,
             title = title,
@@ -174,9 +192,9 @@ class ExampleAudioNotificationRepositoryImpl(context: Context) :
             duration = duration,
             mediaSession = mediaSession
         )
-        showNotification(
+        appPushlyNotification.showNotification(
             notificationId = notificationId,
-            notification = notification,
+            notification = notification
         )
     }
 }

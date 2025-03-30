@@ -19,7 +19,7 @@ import com.fadlurahmanfdev.medx.constant.MedxErrorConstant
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
 
 @UnstableApi
-abstract class BaseIMedxAudioPlayerService : Service(), IMedxAudioPlayerListener {
+abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener {
     private lateinit var audioPlayer: MedxAudioPlayer
 
     var notificationId: Int = -1
@@ -121,13 +121,13 @@ abstract class BaseIMedxAudioPlayerService : Service(), IMedxAudioPlayerListener
 
         audioPlayer.playHttpAudio(mediaItems)
 
-        startForeground(
-            notificationId,
-            idleAudioNotification(
-                notificationId = notificationId,
-                mediaItem = mediaItems.first(),
-                mediaSession = mediaSession!!
-            )
+        idleAudioNotification(
+            notificationId = notificationId,
+            mediaItem = mediaItems.first(),
+            mediaSession = mediaSession!!,
+            onReady = { notification ->
+                startForeground(notificationId, notification)
+            }
         )
     }
 
@@ -160,13 +160,13 @@ abstract class BaseIMedxAudioPlayerService : Service(), IMedxAudioPlayerListener
 
             audioPlayer.resume()
 
-            startForeground(
-                notificationId,
-                idleAudioNotification(
-                    notificationId = notificationId,
-                    mediaItem = mediaItems.first(),
-                    mediaSession = mediaSession!!
-                )
+            idleAudioNotification(
+                notificationId = notificationId,
+                mediaItem = mediaItems.first(),
+                mediaSession = mediaSession!!,
+                onReady = { notification ->
+                    startForeground(notificationId, notification)
+                }
             )
         } else {
             Log.i(
@@ -191,17 +191,19 @@ abstract class BaseIMedxAudioPlayerService : Service(), IMedxAudioPlayerListener
                 this::class.java.simpleName,
                 "Medx-LOG %%% - unable to seek audio position, unable to get position: $position"
             )
-           return
+            return
         }
 
         audioPlayer.seekToPosition(position)
     }
 
+
     abstract fun idleAudioNotification(
         notificationId: Int,
         mediaItem: MediaItem,
-        mediaSession: MediaSessionCompat
-    ): Notification
+        mediaSession: MediaSessionCompat,
+        onReady: (notification: Notification) -> Unit
+    )
 
     @OptIn(UnstableApi::class)
     override fun onDestroy() {

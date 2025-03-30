@@ -8,13 +8,13 @@ import androidx.media3.datasource.cache.SimpleCache
 import java.io.File
 
 @UnstableApi
-object CacheUtilities {
+object MedxCacheUtilities {
 
     // cache ditaro sini karena cuman boleh singleton
     private lateinit var downloadCache: SimpleCache
 
     fun getSimpleCache(context: Context): SimpleCache {
-        return if (CacheUtilities::downloadCache.isInitialized) {
+        return if (MedxCacheUtilities::downloadCache.isInitialized) {
             downloadCache
         } else {
             val downloadContentDirectory = File(context.cacheDir, "media_cache")

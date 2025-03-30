@@ -1,11 +1,11 @@
 package com.fadlurahmanfdev.example.domain.usecase
 
-import com.fadlurahmanfdev.example.data.repository.ExampleMediaNotificationRepository
+import com.fadlurahmanfdev.example.data.repository.AppMedxNotificationRepository
 
 class ExampleMediaPlayerUseCaseImpl(
-    private val exampleMediaNotificationRepository: ExampleMediaNotificationRepository
+    private val appMedxNotificationRepository: AppMedxNotificationRepository
 ) : ExampleMediaPlayerUseCase {
     override fun createChannel(){
-        return exampleMediaNotificationRepository.createMediaNotificationChannel()
+        return appMedxNotificationRepository.createMediaNotificationChannel()
     }
 }

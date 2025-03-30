@@ -15,7 +15,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
-import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2I
+import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2
 import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
 import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.BUFFERING
@@ -57,15 +57,21 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
 
         audios = listOf(
             MediaItem.Builder()
-                .setUri(Uri.parse("https://equran.nos.wjv-1.neo.id/audio-full/Abdullah-Al-Juhany/110.mp3"))
+                .setUri(Uri.parse("https://www.bensound.com/bensound-music/bensound-acousticbreeze.mp3"))
                 .setMediaMetadata(
-                    MediaMetadata.Builder().setTitle("SURAH 110").setArtist("AL QURAN").build()
+                    MediaMetadata.Builder().setTitle("Acoustic Breeze").setArtist("Bensound")
+                        .setArtworkUri(Uri.parse("https://www.bensound.com/bensound-img/acousticbreeze.jpg"))
+                        .setMediaType(MediaMetadata.MEDIA_TYPE_AUDIO_BOOK_CHAPTER)
+                        .build()
                 )
                 .build(),
             MediaItem.Builder()
-                .setUri(Uri.parse("https://equran.nos.wjv-1.neo.id/audio-full/Abdullah-Al-Juhany/111.mp3"))
+                .setUri(Uri.parse("https://www.bensound.com/bensound-music/bensound-creativeminds.mp3"))
                 .setMediaMetadata(
-                    MediaMetadata.Builder().setTitle("SURAH 111").setArtist("AL QURAN V2").build()
+                    MediaMetadata.Builder().setTitle("Creative Minds").setArtist("Bensound")
+                        .setArtworkUri(Uri.parse("https://www.bensound.com/bensound-img/creativeminds.jpg"))
+                        .setMediaType(MediaMetadata.MEDIA_TYPE_AUDIO_BOOK_CHAPTER)
+                        .build()
                 )
                 .build(),
         )
@@ -78,7 +84,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
                 PLAYING -> {
                     MedxAudioPlayerManager.pause(
                         this,
-                        AppAudioPlayerServiceV2I::class.java
+                        AppAudioPlayerServiceV2::class.java
                     )
                 }
 
@@ -86,7 +92,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
                     MedxAudioPlayerManager.resume(
                         this,
                         notificationId = 1,
-                        AppAudioPlayerServiceV2I::class.java
+                        AppAudioPlayerServiceV2::class.java
                     )
                 }
 
@@ -97,11 +103,14 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
         }
 
         ivPrevious.setOnClickListener {
-            MedxAudioPlayerManager.skipToPrevious(context = this, AppAudioPlayerServiceV2I::class.java)
+            MedxAudioPlayerManager.skipToPrevious(
+                context = this,
+                AppAudioPlayerServiceV2::class.java
+            )
         }
 
         ivNext.setOnClickListener {
-            MedxAudioPlayerManager.skipToNext(context = this, AppAudioPlayerServiceV2I::class.java)
+            MedxAudioPlayerManager.skipToNext(context = this, AppAudioPlayerServiceV2::class.java)
         }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -114,7 +123,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
                     MedxAudioPlayerManager.seekToPosition(
                         this@RemoteMusicPlayerActivityV2,
                         progress.toLong(),
-                        AppAudioPlayerServiceV2I::class.java
+                        AppAudioPlayerServiceV2::class.java
                     )
                 }
             }
@@ -138,7 +147,7 @@ class RemoteMusicPlayerActivityV2 : AppCompatActivity(), MedxAudioPlayerManager.
             this,
             notificationId = 1,
             mediaItems = audios,
-            AppAudioPlayerServiceV2I::class.java
+            AppAudioPlayerServiceV2::class.java
         )
     }
 

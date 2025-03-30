@@ -46,4 +46,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(project(":medx"))
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.fadlurahmanfdev:pushly:0.0.2")
 }

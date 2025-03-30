@@ -19,7 +19,7 @@
             </intent-filter>
         </receiver>
         <service
-            android:name="com.fadlurahmanfdev.medx.service.BaseIMedxAudioPlayerService"
+            android:name="com.fadlurahmanfdev.medx.service.BaseMedxAudioPlayerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_REMOTE_AUDIO" />

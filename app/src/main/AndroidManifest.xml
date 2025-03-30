@@ -41,7 +41,7 @@
             </intent-filter>
         </receiver>
         <service
-            android:name=".domain.service.AppAudioPlayerServiceV2I"
+            android:name=".domain.service.AppAudioPlayerServiceV2"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_REMOTE_AUDIO" />

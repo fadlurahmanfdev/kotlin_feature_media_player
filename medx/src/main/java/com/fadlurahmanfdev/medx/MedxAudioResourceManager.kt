@@ -8,7 +8,7 @@ import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.cache.CacheDataSink
 import androidx.media3.datasource.cache.CacheDataSource
 import com.fadlurahmanfdev.medx.base.IMedxAudioResourceManager
-import com.fadlurahmanfdev.medx.utilities.CacheUtilities
+import com.fadlurahmanfdev.medx.utilities.MedxCacheUtilities
 
 class MedxAudioResourceManager : IMedxAudioResourceManager {
     /**
@@ -39,7 +39,7 @@ class MedxAudioResourceManager : IMedxAudioResourceManager {
         dataSourceFactory: DataSource.Factory
     ): CacheDataSource.Factory {
         return CacheDataSource.Factory()
-            .setCache(CacheUtilities.getSimpleCache(context))
+            .setCache(MedxCacheUtilities.getSimpleCache(context))
             .setCacheWriteDataSinkFactory(createCacheDataSinkFactory(context))
             .setCacheReadDataSourceFactory(FileDataSource.Factory())
             .setUpstreamDataSourceFactory(dataSourceFactory)
@@ -49,6 +49,6 @@ class MedxAudioResourceManager : IMedxAudioResourceManager {
     @UnstableApi
     private fun createCacheDataSinkFactory(context: Context): CacheDataSink.Factory {
         return CacheDataSink.Factory()
-            .setCache(CacheUtilities.getSimpleCache(context))
+            .setCache(MedxCacheUtilities.getSimpleCache(context))
     }
 }
