@@ -5,42 +5,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 
-    <application
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.Kotlin_feature_media_player"
-        tools:targetApi="31">
-        <activity
-            android:name=".presentation.ForegroundServiceAudioPlayerActivity"
-            android:exported="false" />
-        <activity
-            android:name=".presentation.SimpleAudioPlayerForAudioFileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".presentation.SimpleAudioPlayerActivity"
-            android:exported="false" />
-        <activity
-            android:name=".presentation.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
+    <application>
         <receiver
-            android:name=".domain.receiver.AppAudioPlayerReceiverV2"
+            android:name="com.fadlurahmanfdev.medx.receiver.BaseMedxAudioPlayerReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
@@ -51,7 +19,7 @@
             </intent-filter>
         </receiver>
         <service
-            android:name=".domain.service.AppAudioPlayerServiceV2"
+            android:name="com.fadlurahmanfdev.medx.service.BaseMedxAudioPlayerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_AUDIO" />

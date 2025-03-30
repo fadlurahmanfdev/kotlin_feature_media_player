@@ -9,7 +9,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.data.dto.model.FeatureModel
-import com.fadlurahmanfdev.example.data.repository.ExampleAudioNotificationRepositoryImpl
+import com.fadlurahmanfdev.example.data.repository.AppMedxNotification
 import com.fadlurahmanfdev.example.domain.usecase.ExampleMediaPlayerUseCaseImpl
 
 class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
@@ -24,9 +24,21 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
         ),
         FeatureModel(
             featureIcon = R.drawable.baseline_developer_mode_24,
-            title = "Play Music",
-            desc = "Play remote music",
-            enum = "PLAY_REMOTE_MUSIC"
+            title = "Simple Audio Player",
+            desc = "Simple Audio Player",
+            enum = "SIMPLE_AUDIO_PLAYER"
+        ),
+        FeatureModel(
+            featureIcon = R.drawable.baseline_developer_mode_24,
+            title = "Simple Audio Player For Audio File",
+            desc = "Simple Audio Player For Audio File",
+            enum = "SIMPLE_AUDIO_PLAYER_FOR_AUDIO_FILE"
+        ),
+        FeatureModel(
+            featureIcon = R.drawable.baseline_developer_mode_24,
+            title = "Foreground Service Audio Player",
+            desc = "Foreground Service Audio Player",
+            enum = "FOREGROUND_SERVICE_AUDIO_PLAYER"
         ),
     )
 
@@ -47,7 +59,7 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
 
         viewModel = MainViewModel(
             exampleMediaPlayerUseCase = ExampleMediaPlayerUseCaseImpl(
-                exampleMediaNotificationRepository = ExampleAudioNotificationRepositoryImpl(
+                appMedxNotificationRepository = AppMedxNotification(
                     this
                 )
             )
@@ -69,8 +81,18 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
                 viewModel.createChannel()
             }
 
-            "PLAY_REMOTE_MUSIC" -> {
-                val intent = Intent(this, RemoteMusicPlayerActivity::class.java)
+            "SIMPLE_AUDIO_PLAYER" -> {
+                val intent = Intent(this, SimpleAudioPlayerActivity::class.java)
+                startActivity(intent)
+            }
+
+            "SIMPLE_AUDIO_PLAYER_FOR_AUDIO_FILE" -> {
+                val intent = Intent(this, SimpleAudioPlayerForAudioFileActivity::class.java)
+                startActivity(intent)
+            }
+
+            "FOREGROUND_SERVICE_AUDIO_PLAYER" -> {
+                val intent = Intent(this, ForegroundServiceAudioPlayerActivity::class.java)
                 startActivity(intent)
             }
         }
