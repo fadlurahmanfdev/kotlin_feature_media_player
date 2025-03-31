@@ -15,9 +15,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
-import com.fadlurahmanfdev.medx.MedxAudioPlayer
-import com.fadlurahmanfdev.medx.base.IMedxAudioPlayerListener
-import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx_player.MedxAudioPlayer
+import com.fadlurahmanfdev.medx_player.base.IMedxAudioPlayerListener
+import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
 
 class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxAudioPlayerListener {
     lateinit var medxAudioPlayer: MedxAudioPlayer

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+        <receiver
+            android:name="com.fadlurahmanfdev.medx_player.receiver.BaseMedxAudioPlayerReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_NEXT_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SEEK_TO_POSITION_AUDIO" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name="com.fadlurahmanfdev.medx_player.service.BaseMedxAudioPlayerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_NEXT_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SEEK_TO_POSITION_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_AUDIO_DURATION_INFO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_AUDIO_POSITION_INFO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_AUDIO_STATE_INFO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_AUDIO_MEDIA_META_DATA_INFO" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>

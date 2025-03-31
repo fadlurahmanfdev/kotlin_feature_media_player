@@ -2,8 +2,8 @@ package com.fadlurahmanfdev.example.domain.receiver
 
 import android.content.Context
 import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2
-import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
-import com.fadlurahmanfdev.medx.receiver.BaseMedxAudioPlayerReceiver
+import com.fadlurahmanfdev.medx_player.MedxAudioPlayerManager
+import com.fadlurahmanfdev.medx_player.receiver.BaseMedxAudioPlayerReceiver
 
 class AppAudioPlayerReceiverV2 : BaseMedxAudioPlayerReceiver() {
     override fun onPauseAudio(context: Context) {

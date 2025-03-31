@@ -17,11 +17,11 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2
-import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
-import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState
-import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.BUFFERING
-import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.PAUSED
-import com.fadlurahmanfdev.medx.data.enums.MedxAudioPlayerState.PLAYING
+import com.fadlurahmanfdev.medx_player.MedxAudioPlayerManager
+import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState.BUFFERING
+import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState.PAUSED
+import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState.PLAYING
 
 class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlayerManager.Listener {
     lateinit var medxAudioPlayerManager: MedxAudioPlayerManager

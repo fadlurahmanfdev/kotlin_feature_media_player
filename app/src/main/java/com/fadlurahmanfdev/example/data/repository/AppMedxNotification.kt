@@ -10,8 +10,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.receiver.AppAudioPlayerReceiverV2
-import com.fadlurahmanfdev.medx.MedxAudioPlayerManager
-import com.fadlurahmanfdev.medx.notification.BaseMedxNotification
+import com.fadlurahmanfdev.medx_player.MedxAudioPlayerManager
+import com.fadlurahmanfdev.medx_player.notification.BaseMedxNotification
 
 class AppMedxNotification(context: Context) : BaseMedxNotification(context),
     AppMedxNotificationRepository {
