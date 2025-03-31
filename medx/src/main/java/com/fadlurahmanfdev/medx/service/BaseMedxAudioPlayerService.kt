@@ -119,14 +119,13 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
 
         this.mediaItems = mediaItems
 
-        audioPlayer.playAudio(mediaItems)
-
         idleAudioNotification(
             notificationId = notificationId,
             mediaItem = mediaItems.first(),
             mediaSession = mediaSession!!,
             onReady = { notification ->
                 startForeground(notificationId, notification)
+                audioPlayer.playAudio(mediaItems)
             }
         )
     }
@@ -158,14 +157,13 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
                 return
             }
 
-            audioPlayer.resume()
-
             idleAudioNotification(
                 notificationId = notificationId,
                 mediaItem = mediaItems.first(),
                 mediaSession = mediaSession!!,
                 onReady = { notification ->
                     startForeground(notificationId, notification)
+                    audioPlayer.resume()
                 }
             )
         } else {

@@ -188,8 +188,12 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
     }
 
     /**
-     * skip to previous media item.
+     * skip to previous media item if there is any previous media item.
      *
+     * to enable skip to previous media item, add multiple audio when play an audio
+     *
+     * @see playAudio
+     * @author @fadlurahmanfdev - Taufik Fadlurahman Fajari
      * */
     override fun skipToPreviousMediaItem() {
         if (exoPlayer.hasPreviousMediaItem()) {
@@ -204,8 +208,12 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
     }
 
     /**
-     * skip to next media item.
+     * skip to next media item if there is any next media item
      *
+     * to enable skip to next media item, add multiple audio when play an audio
+     *
+     * @see playAudio
+     * @author @fadlurahmanfdev - Taufik Fadlurahman Fajari
      * */
     override fun skipToNextMediaItem() {
         if (exoPlayer.hasNextMediaItem()) {
