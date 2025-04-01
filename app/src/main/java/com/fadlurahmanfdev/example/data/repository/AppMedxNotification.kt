@@ -9,7 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.fadlurahmanfdev.example.R
-import com.fadlurahmanfdev.example.domain.receiver.AppAudioPlayerReceiverV2
+import com.fadlurahmanfdev.example.domain.receiver.AppMedxAudioPlayerReceiver
 import com.fadlurahmanfdev.medx_player.MedxAudioPlayerManager
 import com.fadlurahmanfdev.medx_player.notification.BaseMedxNotification
 
@@ -52,7 +52,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                         MedxAudioPlayerManager.getSkipToPreviousAudioPendingIntent(
                             context,
                             1,
-                            AppAudioPlayerReceiverV2::class.java
+                            AppMedxAudioPlayerReceiver::class.java
                         )
                     )
                 )
@@ -66,7 +66,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                         "Previous",
                         MedxAudioPlayerManager.getNonePendingIntent(
                             context,
-                            AppAudioPlayerReceiverV2::class.java
+                            AppMedxAudioPlayerReceiver::class.java
                         )
                     )
                 )
@@ -80,7 +80,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                         MedxAudioPlayerManager.getPauseAudioPendingIntent(
                             context,
                             2,
-                            AppAudioPlayerReceiverV2::class.java
+                            AppMedxAudioPlayerReceiver::class.java
                         )
                     )
                 )
@@ -93,7 +93,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                             context,
                             requestCode = 3,
                             notificationId = 1,
-                            AppAudioPlayerReceiverV2::class.java
+                            AppMedxAudioPlayerReceiver::class.java
                         )
                     )
                 )
@@ -106,7 +106,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                             context,
                             requestCode = 3,
                             notificationId = 1,
-                            AppAudioPlayerReceiverV2::class.java
+                            AppMedxAudioPlayerReceiver::class.java
                         )
                     )
                 )
@@ -117,7 +117,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                         "Play",
                         MedxAudioPlayerManager.getNonePendingIntent(
                             context,
-                            AppAudioPlayerReceiverV2::class.java
+                            AppMedxAudioPlayerReceiver::class.java
                         )
                     )
                 )
@@ -131,7 +131,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                         MedxAudioPlayerManager.getSkipToNextAudioPendingIntent(
                             context,
                             requestCode = 4,
-                            AppAudioPlayerReceiverV2::class.java
+                            AppMedxAudioPlayerReceiver::class.java
                         )
                     )
                 )
@@ -142,7 +142,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                         "Next",
                         MedxAudioPlayerManager.getNonePendingIntent(
                             context,
-                            AppAudioPlayerReceiverV2::class.java
+                            AppMedxAudioPlayerReceiver::class.java
                         )
                     )
                 )
@@ -163,7 +163,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                     context,
                     position = positionSeekTo,
                     notificationId = notificationId,
-                    clazz = AppAudioPlayerReceiverV2::class.java,
+                    clazz = AppMedxAudioPlayerReceiver::class.java,
                 )
             },
             mediaSession = mediaSession,

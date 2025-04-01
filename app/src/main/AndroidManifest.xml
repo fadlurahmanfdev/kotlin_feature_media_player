@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -40,7 +41,7 @@
         </activity>
 
         <receiver
-            android:name=".domain.receiver.AppAudioPlayerReceiverV2"
+            android:name=".domain.receiver.AppMedxAudioPlayerReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
@@ -51,8 +52,9 @@
             </intent-filter>
         </receiver>
         <service
-            android:name=".domain.service.AppAudioPlayerServiceV2"
-            android:exported="false">
+            android:name=".domain.service.AppMedxAudioPlayerService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback">
             <intent-filter>
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />

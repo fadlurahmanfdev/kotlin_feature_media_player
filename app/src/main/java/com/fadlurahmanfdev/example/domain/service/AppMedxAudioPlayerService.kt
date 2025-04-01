@@ -18,7 +18,7 @@ import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
 import com.fadlurahmanfdev.medx_player.service.BaseMedxAudioPlayerService
 
 @OptIn(UnstableApi::class)
-class AppAudioPlayerServiceV2 : BaseMedxAudioPlayerService() {
+class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
     private lateinit var appMedxNotificationRepository: AppMedxNotificationRepository
 
     var albumArtBitmap: Bitmap? = null

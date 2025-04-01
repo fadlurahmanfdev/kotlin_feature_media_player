@@ -16,7 +16,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
-import com.fadlurahmanfdev.example.domain.service.AppAudioPlayerServiceV2
+import com.fadlurahmanfdev.example.domain.service.AppMedxAudioPlayerService
 import com.fadlurahmanfdev.medx_player.MedxAudioPlayerManager
 import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
 import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState.BUFFERING
@@ -85,7 +85,7 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
                 PLAYING -> {
                     MedxAudioPlayerManager.pause(
                         this,
-                        AppAudioPlayerServiceV2::class.java
+                        AppMedxAudioPlayerService::class.java
                     )
                 }
 
@@ -93,7 +93,7 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
                     MedxAudioPlayerManager.resume(
                         this,
                         notificationId = 1,
-                        AppAudioPlayerServiceV2::class.java
+                        AppMedxAudioPlayerService::class.java
                     )
                 }
 
@@ -106,12 +106,12 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
         ivPrevious.setOnClickListener {
             MedxAudioPlayerManager.skipToPrevious(
                 context = this,
-                AppAudioPlayerServiceV2::class.java
+                AppMedxAudioPlayerService::class.java
             )
         }
 
         ivNext.setOnClickListener {
-            MedxAudioPlayerManager.skipToNext(context = this, AppAudioPlayerServiceV2::class.java)
+            MedxAudioPlayerManager.skipToNext(context = this, AppMedxAudioPlayerService::class.java)
         }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -124,7 +124,7 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
                     MedxAudioPlayerManager.seekToPosition(
                         this@ForegroundServiceAudioPlayerActivity,
                         progress.toLong(),
-                        AppAudioPlayerServiceV2::class.java
+                        AppMedxAudioPlayerService::class.java
                     )
                 }
             }
@@ -148,7 +148,7 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
             this,
             notificationId = 1,
             mediaItems = mediaItems,
-            AppAudioPlayerServiceV2::class.java
+            AppMedxAudioPlayerService::class.java
         )
     }
 
