@@ -1,8 +1,12 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-parcelize")
     id("maven-publish")
+
+    id("com.vanniktech.maven.publish") version "0.29.0"
 }
 
 android {
@@ -38,10 +42,6 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 
     val media3_version = "1.3.1"
     api("androidx.media3:media3-exoplayer:$media3_version")
@@ -50,4 +50,37 @@ dependencies {
     api("androidx.media3:media3-exoplayer-hls:$media3_version")
     api("androidx.media3:media3-session:$media3_version")
     api("androidx.media:media:1.7.0")
+}
+
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+
+    coordinates("com.fadlurahmanfdev", "medx_player", "0.0.1")
+
+    pom {
+        name.set("Medx Player")
+        description.set("Library to simplify media player operation")
+        inceptionYear.set("2025")
+        url.set("https://github.com/fadlurahmanfdev/kotlin_feature_media_player/")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("fadlurahmanfdev")
+                name.set("Taufik Fadlurahman Fajari")
+                url.set("https://github.com/fadlurahmanfdev/")
+            }
+        }
+        scm {
+            url.set("https://github.com/fadlurahmanfdev/kotlin_feature_media_player/")
+            connection.set("scm:git:git://github.com/fadlurahmanfdev/kotlin_feature_media_player.git")
+            developerConnection.set("scm:git:ssh://git@github.com/fadlurahmanfdev/kotlin_feature_media_player.git")
+        }
+    }
 }

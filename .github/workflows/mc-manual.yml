@@ -1,0 +1,51 @@
+name: Publish To Maven Central
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: MavenCentral
+    steps:
+      - name: Checkout V3
+        uses: actions/checkout@v3
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+      - name: Setup Version
+        id: setup
+        run: |
+          echo "TAG VERSION: ${{ github.ref_name }}"
+          echo "RELEASE VERSION: ${GITHUB_REF_NAME#v}"
+          echo "::set-output name=release_name::${GITHUB_REF_NAME#v}"
+      - name: Setup Maven Central and GPG Key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --dearmor > secret_key.gpg
+          ls
+          echo "---------------------------||---------------------------"
+          echo "---------------------------||---------------------------"
+          echo "---------------------------||---------------------------"
+          echo "" >> gradle.properties
+          echo "mavenCentralUsername=${{ vars.MAVEN_CENTRAL_TOKEN_USERNAME }}" >> gradle.properties
+          echo "" >> gradle.properties
+          echo "mavenCentralPassword=${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}" >> gradle.properties
+          echo "" >> gradle.properties
+          echo "signing.keyId=${{ vars.GPG_KEY_ID }}" >> gradle.properties
+          echo "" >> gradle.properties >> gradle.properties
+          echo "signing.password=${{ secrets.GPG_KEY_PASSWORD }}" >> gradle.properties
+          echo "" >> gradle.properties >> gradle.properties
+          echo "signing.secretKeyRingFile=../secret_key.gpg" >> gradle.properties
+          echo "---------------------------||---------------------------"
+          echo "---------------------------||---------------------------"
+          echo "---------------------------||---------------------------"
+          cat gradle.properties
+      - name: Publish To Maven Central
+        run: |
+          ./gradlew clean
+          ./gradlew :medx_player:publishMavenPublicationToMavenCentralRepository
+          
