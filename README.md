@@ -1,11 +1,12 @@
 # Medx Audio Player Library 📻
 
 A lightweight yet powerful Android audio player library that handles:
+
 - Audio playback operations
 - Media session management
 - Media notifications
 
-## Installation 💽
+# Installation 💽
 
 Add the dependency to your build.gradle:
 
@@ -13,115 +14,177 @@ Add the dependency to your build.gradle:
 implementation("com.fadlurahmanfdev.medx_player:x.y.z")
 ```
 
-## Quick Start 🚀
+# Quick Start 🚀
 
-### Simple Audio Player
+## Initiate Media Item
 
-Medx Audio Player have a simple implementation of media player, it operates without foreground service,
-and will have session along with the activity.
+A MediaItem contains audio metadata including:
 
-#### Initialization
+- Audio URI (HTTP, Raw Resource, or local file)
+- Title, artist, artwork
+- Media type
 
-Initialize the player in your Activity/Fragment
+```kotlin
+val mediaItems = arrayListOf<MediaItem>()
+
+// HTTP Audio Example
+mediaItems.add(
+    MediaItem.Builder()
+        .setUri(Uri.parse("https://example.com/audio.mp3"))
+        .setMediaMetadata(
+            MediaMetadata.Builder()
+                .setTitle("Sample Song")
+                .setArtist("Artist Name")
+                .setArtworkUri(Uri.parse("https://example.com/artwork.jpg"))
+                .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
+                .build()
+        )
+        .build()
+)
+
+// Raw Resource Example
+mediaItems.add(
+    MediaItem.Builder()
+        .setUri(
+            Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .path(R.raw.audio_file.toString())
+                .build()
+        )
+        // ... metadata ...
+        .build()
+)
+```
+
+# Implementation Options
+
+## Simple Medx Audio Player (Activity-bound)
+
+Best for short audio playback that should stop when activity closes.
+
+### Initialization
 
 ```kotlin
 val medxAudioPlayer = MedxAudioPlayer(context)
 medxAudioPlayer.initialize()
 ```
 
-### Core Features
-
-#### Playing Audio
-
-Play single or multiple audio tracks
-
-```kotlin
-// initialize media item
-val mediaItems = listOf(
-    // HTTP Audio
-    MediaItem.Builder()
-        .setUri(Uri.parse("https://www.bensound.com/bensound-music/bensound-acousticbreeze.mp3"))
-        .setMediaMetadata(
-            MediaMetadata.Builder().setTitle("Acoustic Breeze").setArtist("Bensound")
-                .setArtworkUri(Uri.parse("https://www.bensound.com/bensound-img/acousticbreeze.jpg"))
-                .setMediaType(MediaMetadata.MEDIA_TYPE_AUDIO_BOOK_CHAPTER)
-                .build()
-        )
-        .build(),
-    // Raw Resource Audio
-    MediaItem.Builder()
-        .setUri(Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).path(R.raw.bensound_creativeminds.toString()).build())
-        .setMediaMetadata(
-            MediaMetadata.Builder().setTitle("Creative Minds").setArtist("Bensound")
-                .setArtworkUri(Uri.parse("https://www.bensound.com/bensound-img/creativeminds.jpg"))
-                .setMediaType(MediaMetadata.MEDIA_TYPE_AUDIO_BOOK_CHAPTER)
-                .build()
-        )
-        .build(),
-)
-medxAudioPlayer.playAudio(mediaItems)
-```
-
 #### Playback Control
 
 ```kotlin
-// Pause
+// Start playback
+medxAudioPlayer.playAudio(mediaItems)
+
+// Control playback
 medxAudioPlayer.pause()
-
-// Resume
 medxAudioPlayer.resume()
-
-// Skip tracks
 medxAudioPlayer.skipToNextMediaItem()
 medxAudioPlayer.skipToPreviousMediaItem()
-
-// Seek to position (in milliseconds)
-medxAudioPlayer.seekToPosition(5000L)
+medxAudioPlayer.seekToPosition(5000L) // milliseconds
 ```
 
-### Foreground Service Audio Player
+## Foreground Service Medx Audio Player
 
-Medx Audio Player have a implementation of media player, it operates with foreground service.
+Best for long-running audio playback that should continue when app is backgrounded.
 
-If the audio played with the foreground service, if the activity is destroy or the apps is in minimized mode, the audio still playing.
+### Initialization
 
-The audio player will stop, if the app destroy or the user dismiss the notification.
-
-#### Initialization
-
-Create the service class, extend from `BaseMedxAudioPlayerService`
-
-```kotlin
-class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
-    ...
-}
-```
-
-Foreground service need notification to make the session active. Initialize notification channel when create notification
-
-See [example]()
+#### Create Service Class
 
 ```kotlin
 class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
     override fun onInitAndCreateMediaNotificationChannel() {
-        // create notification channel
+        // Initialize notification channel
+        createNotificationChannel(
+            channelId = "music_channel",
+            channelName = "Music Playback",
+            importance = NotificationManager.IMPORTANCE_LOW
+        )
     }
-}
-```
 
-Audio Player will play after notification ready asynchronously, make sure prepare `idleAudioNotification`.
-
-`idleAudioNotification` is a notification that will shown when audio player state being idle.
-
-```kotlin
-class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
     override fun idleAudioNotification(
         notificationId: Int,
         mediaItem: MediaItem,
         mediaSession: MediaSessionCompat,
-        onReady: (notification: Notification) -> Unit
-    ){
-        
+        onReady: (Notification) -> Unit
+    ) {
+        // Build your custom notification
+        val notification = buildNotification(mediaItem)
+        onReady(notification)
     }
 }
+```
+
+#### Create Broadcast Receiver
+
+```kotlin
+class AppAudioPlayerReceiver : BaseMedxAudioPlayerReceiver() {
+    override fun onPauseAudio(context: Context) {
+        // Handle pause action from notification
+    }
+
+    override fun onResumeAudio(context: Context, notificationId: Int) {
+        // Handle play/resume action
+    }
+
+    // ... implement other callbacks ...
+}
+```
+
+#### Register In Android Manifest
+
+```xml
+
+<manifest>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    ...
+
+    <application>
+        ...
+        <receiver android:name=".domain.receiver.AppMedxAudioPlayerReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_NEXT_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SEEK_TO_POSITION_AUDIO" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".domain.service.AppMedxAudioPlayerService" android:exported="false"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_NEXT_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_SEEK_TO_POSITION_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_AUDIO_DURATION_INFO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_AUDIO_POSITION_INFO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_AUDIO_STATE_INFO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_AUDIO_MEDIA_META_DATA_INFO" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>
+```
+
+### Playback Control
+
+```kotlin
+// Start playback
+MedxAudioPlayerManager.play(
+    context,
+    mediaItems,
+    AppMedxAudioPlayerService::class.java
+)
+
+// Control playback
+MedxAudioPlayerManager.pause(context, AppMedxAudioPlayerService::class.java)
+MedxAudioPlayerManager.resume(context, NOTIFICATION_ID, AppMedxAudioPlayerService::class.java)
+MedxAudioPlayerManager.skipToNext(context, AppMedxAudioPlayerService::class.java)
+MedxAudioPlayerManager.seekToPosition(context, positionMs, AppMedxAudioPlayerService::class.java)
 ```
