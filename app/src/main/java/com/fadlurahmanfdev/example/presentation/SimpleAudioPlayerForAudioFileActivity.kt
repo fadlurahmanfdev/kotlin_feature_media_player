@@ -1,5 +1,6 @@
 package com.fadlurahmanfdev.example.presentation
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
@@ -54,6 +55,7 @@ class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxAudioPla
 
     val filePermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            Log.d(this::class.java.simpleName, "App-MedX-LOG %%% - file permission is granted: $isGranted")
             if (isGranted) {
                 audioFilePickerLauncher.launch("audio/mpeg")
             }
@@ -78,9 +80,6 @@ class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxAudioPla
 
         medxAudioPlayer = MedxAudioPlayer(this)
         medxAudioPlayer.initialize()
-
-
-        filePermissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
 
         tvTitle.text = "-"
         tvArtist.text = "-"
@@ -131,6 +130,10 @@ class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxAudioPla
         })
 
         medxAudioPlayer.addListener(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            filePermissionLauncher.launch(android.Manifest.permission.READ_MEDIA_AUDIO)
+        }
     }
 
     override fun onDestroy() {

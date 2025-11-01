@@ -40,6 +40,12 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
             desc = "Foreground Service Audio Player",
             enum = "FOREGROUND_SERVICE_AUDIO_PLAYER"
         ),
+        FeatureModel(
+            featureIcon = R.drawable.baseline_developer_mode_24,
+            title = "Simple Video Player",
+            desc = "Simple Video Player",
+            enum = "SIMPLE_VIDEO_PLAYER"
+        ),
     )
 
     private lateinit var rv: RecyclerView
@@ -93,6 +99,11 @@ class MainActivity : AppCompatActivity(), ListExampleAdapter.Callback {
 
             "FOREGROUND_SERVICE_AUDIO_PLAYER" -> {
                 val intent = Intent(this, ForegroundServiceAudioPlayerActivity::class.java)
+                startActivity(intent)
+            }
+
+            "SIMPLE_VIDEO_PLAYER" -> {
+                val intent = Intent(this, SimpleVideoPlayerActivity::class.java)
                 startActivity(intent)
             }
         }
