@@ -73,7 +73,7 @@ medxAudioPlayer.initialize()
 
 ```kotlin
 // Start playback
-medxAudioPlayer.playAudio(mediaItems)
+medxAudioPlayer.playMedia(mediaItems)
 
 // Control playback
 medxAudioPlayer.pause()
