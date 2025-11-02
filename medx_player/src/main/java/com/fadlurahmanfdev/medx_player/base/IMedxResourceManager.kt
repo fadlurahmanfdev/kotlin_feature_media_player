@@ -8,7 +8,7 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 
-interface IMedxAudioResourceManager {
+interface IMedxResourceManager {
     /**
      * Create Default Datasource Factory.
      *

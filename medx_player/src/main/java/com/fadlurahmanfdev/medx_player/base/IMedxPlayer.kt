@@ -3,10 +3,10 @@ package com.fadlurahmanfdev.medx_player.base
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
-import com.fadlurahmanfdev.medx_player.data.enums.MedxVideoPlayerState
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
 
-interface IMedxVideoPlayer {
-    val medxVideoResourceManager: IMedxVideoResourceManager
+interface IMedxPlayer {
+    val medxResourceManager: IMedxResourceManager
 
     var exoPlayer: ExoPlayer
     var mediaSession: MediaSession
@@ -17,19 +17,19 @@ interface IMedxVideoPlayer {
     val position: Long
         get() = _position
 
-    var _medxVideoPlayerState: MedxVideoPlayerState
-    val medxVideoPlayerState: MedxVideoPlayerState
-        get() = _medxVideoPlayerState
+    var _medxPlayerState: MedxPlayerState
+    val medxPlayerState: MedxPlayerState
+        get() = _medxPlayerState
 
-    var listener: IMedxVideoPlayerListener?
+    var listener: IMedxPlayerListener?
 
 
     fun initialize()
-    fun addListener(listener: IMedxVideoPlayerListener)
+    fun addListener(listener: IMedxPlayerListener)
 
     fun removeListener()
 
-    fun playVideo(mediaItems: List<MediaItem>)
+    fun playMedia(mediaItems: List<MediaItem>)
     fun pause()
     fun resume()
     fun stop()
@@ -40,5 +40,5 @@ interface IMedxVideoPlayer {
     fun seekToPosition(position: Long)
     fun release()
 
-    fun onVideoPlayerStateChanged(state: MedxVideoPlayerState)
+    fun onPlayerStateChanged(state: MedxPlayerState)
 }

@@ -10,7 +10,6 @@ import android.view.KeyEvent
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
@@ -18,18 +17,18 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.session.MediaSession
-import com.fadlurahmanfdev.medx_player.MedxVideoResourceManager
-import com.fadlurahmanfdev.medx_player.base.IMedxVideoPlayer
-import com.fadlurahmanfdev.medx_player.base.IMedxVideoPlayerListener
-import com.fadlurahmanfdev.medx_player.base.IMedxVideoResourceManager
-import com.fadlurahmanfdev.medx_player.data.enums.MedxVideoPlayerState
+import com.fadlurahmanfdev.medx_player.MedxResourceManager
+import com.fadlurahmanfdev.medx_player.base.IMedxPlayer
+import com.fadlurahmanfdev.medx_player.base.IMedxPlayerListener
+import com.fadlurahmanfdev.medx_player.base.IMedxResourceManager
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
 
 /**
  * Base class for playing an audio from remote, resources, etc.
  * */
-abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPlayer,
+abstract class BaseMedxPlayer(private val context: Context) : IMedxPlayer,
     Player.Listener {
-    override val medxVideoResourceManager: IMedxVideoResourceManager = MedxVideoResourceManager()
+    override val medxResourceManager: IMedxResourceManager = MedxResourceManager()
     override lateinit var exoPlayer: ExoPlayer
     override lateinit var mediaSession: MediaSession
 
@@ -38,7 +37,7 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
     /**
      * Duration of audio.
      *
-     * The duration of audio will be available when [MedxVideoPlayerState] is [MedxVideoPlayerState.READY]
+     * The duration of audio will be available when [MedxPlayerState] is [MedxPlayerState.READY]
      * otherwise it will always return 0
      * */
     override val duration: Long
@@ -48,24 +47,24 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
     /**
      * Position of currently audio playing.
      *
-     * The position of audio fetched from observe audio position by calling [listenVideoPosition].
+     * The position of audio fetched from observe audio position by calling [listenPosition].
      * By default, it will listen an audio position after playing an audio.
      * */
     override val position: Long
         get() = _position
 
 
-    override var _medxVideoPlayerState: MedxVideoPlayerState = MedxVideoPlayerState.IDLE
+    override var _medxPlayerState: MedxPlayerState = MedxPlayerState.IDLE
 
     /**
-     * The player state of audio player (e.g., [MedxVideoPlayerState.IDLE], [MedxVideoPlayerState.PLAYING], [MedxVideoPlayerState.BUFFERING], etc).
+     * The player state of audio player (e.g., [MedxPlayerState.IDLE], [MedxPlayerState.PLAYING], [MedxPlayerState.BUFFERING], etc).
      *
-     * @see MedxVideoPlayerState
+     * @see MedxPlayerState
      * */
-    override val medxVideoPlayerState: MedxVideoPlayerState
-        get() = _medxVideoPlayerState
+    override val medxPlayerState: MedxPlayerState
+        get() = _medxPlayerState
 
-    override var listener: IMedxVideoPlayerListener? = null
+    override var listener: IMedxPlayerListener? = null
 
     private val handler = Handler(Looper.getMainLooper())
     private val audioPositionRunnable = object : Runnable {
@@ -78,7 +77,7 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
         }
     }
 
-    override fun addListener(listener: IMedxVideoPlayerListener) {
+    override fun addListener(listener: IMedxPlayerListener) {
         this.listener = listener
     }
 
@@ -128,11 +127,11 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
                             if (keyEvent != null) {
                                 when (keyEvent.keyCode) {
                                     KeyEvent.KEYCODE_MEDIA_PAUSE -> {
-                                        onVideoPlayerStateChanged(MedxVideoPlayerState.PAUSED)
+                                        onPlayerStateChanged(MedxPlayerState.PAUSED)
                                     }
 
                                     KeyEvent.KEYCODE_MEDIA_PLAY -> {
-                                        onVideoPlayerStateChanged(MedxVideoPlayerState.PLAYING)
+                                        onPlayerStateChanged(MedxPlayerState.PLAYING)
                                     }
                                 }
                             }
@@ -146,14 +145,14 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
     /**
      * Listening audio position changed every n seconds.
      * */
-    open fun listenVideoPosition() {
+    open fun listenPosition() {
         handler.postDelayed(audioPositionRunnable, 250)
     }
 
     /**
      * Remove listener audio position changed every n seconds.
      * */
-    fun removeListenerVideoPosition() {
+    fun removeListenerPosition() {
         handler.removeCallbacks(audioPositionRunnable)
     }
 
@@ -162,10 +161,10 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
      *
      * @param mediaItems list of media item that want to be played.
      *
-     * @see [MedxVideoResourceManager.httpDatasourceFactory]
+     * @see [MedxResourceManager.httpDatasourceFactory]
      * */
     @OptIn(UnstableApi::class)
-    override fun playVideo(mediaItems: List<MediaItem>) {
+    override fun playMedia(mediaItems: List<MediaItem>) {
         val mediaSources = arrayListOf<MediaSource>()
         Log.d(
             this::class.java.simpleName,
@@ -178,9 +177,9 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
             when (mediaItem.localConfiguration?.uri?.scheme) {
                 "http", "https" -> {
                     dataSourceFactory =
-                        medxVideoResourceManager.httpDatasourceFactory()
+                        medxResourceManager.httpDatasourceFactory()
                     val cacheDataSourceFactory =
-                        medxVideoResourceManager.cacheDatasourceFactory(context, dataSourceFactory)
+                        medxResourceManager.cacheDatasourceFactory(context, dataSourceFactory)
                     mediaSource =
                         ProgressiveMediaSource.Factory(cacheDataSourceFactory)
                             .createMediaSource(mediaItem)
@@ -188,7 +187,7 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
 
                 "android.resource" -> {
                     dataSourceFactory =
-                        medxVideoResourceManager.rawDatasourceFactory(context)
+                        medxResourceManager.rawDatasourceFactory(context)
                     mediaSource =
                         ProgressiveMediaSource.Factory(dataSourceFactory)
                             .createMediaSource(mediaItem)
@@ -196,7 +195,7 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
 
                 "file" -> {
                     dataSourceFactory =
-                        medxVideoResourceManager.fileDatasourceFactory()
+                        medxResourceManager.fileDatasourceFactory()
                     mediaSource =
                         ProgressiveMediaSource.Factory(dataSourceFactory)
                             .createMediaSource(mediaItem)
@@ -204,7 +203,7 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
 
                 else -> {
                     dataSourceFactory =
-                        medxVideoResourceManager.defaultDatasourceFactory(context)
+                        medxResourceManager.defaultDatasourceFactory(context)
                     mediaSource =
                         ProgressiveMediaSource.Factory(dataSourceFactory)
                             .createMediaSource(mediaItem)
@@ -215,7 +214,7 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
         exoPlayer.setMediaSources(mediaSources)
         exoPlayer.playWhenReady = true
         exoPlayer.prepare()
-        listenVideoPosition()
+        listenPosition()
     }
 
     /**
@@ -223,10 +222,10 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
      *
      * */
     override fun pause() {
-        if (medxVideoPlayerState == MedxVideoPlayerState.PLAYING) {
-            removeListenerVideoPosition()
+        if (medxPlayerState == MedxPlayerState.PLAYING) {
+            removeListenerPosition()
             exoPlayer.pause()
-            onVideoPlayerStateChanged(MedxVideoPlayerState.PAUSED)
+            onPlayerStateChanged(MedxPlayerState.PAUSED)
         }
     }
 
@@ -235,10 +234,10 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
      *
      * */
     override fun resume() {
-        if (medxVideoPlayerState == MedxVideoPlayerState.PAUSED) {
+        if (medxPlayerState == MedxPlayerState.PAUSED) {
             exoPlayer.play()
-            onVideoPlayerStateChanged(MedxVideoPlayerState.PLAYING)
-            listenVideoPosition()
+            onPlayerStateChanged(MedxPlayerState.PLAYING)
+            listenPosition()
         }
     }
 
@@ -247,10 +246,10 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
      *
      * */
     override fun stop() {
-        if (medxVideoPlayerState == MedxVideoPlayerState.PLAYING || medxVideoPlayerState == MedxVideoPlayerState.STOPPED) {
-            removeListenerVideoPosition()
+        if (medxPlayerState == MedxPlayerState.PLAYING || medxPlayerState == MedxPlayerState.STOPPED) {
+            removeListenerPosition()
             exoPlayer.stop()
-            onVideoPlayerStateChanged(MedxVideoPlayerState.STOPPED)
+            onPlayerStateChanged(MedxPlayerState.STOPPED)
         }
     }
 
@@ -264,7 +263,7 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
      *
      * to enable skip to previous media item, add multiple audio when play an audio
      *
-     * @see playVideo
+     * @see playMedia
      * @author @fadlurahmanfdev - Taufik Fadlurahman Fajari
      * */
     override fun skipToPreviousMediaItem() {
@@ -289,7 +288,7 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
      *
      * to enable skip to next media item, add multiple audio when play an audio
      *
-     * @see playVideo
+     * @see playMedia
      * @author @fadlurahmanfdev - Taufik Fadlurahman Fajari
      * */
     override fun skipToNextMediaItem() {
@@ -320,7 +319,7 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
      *
      * */
     override fun release() {
-        if (medxVideoPlayerState != MedxVideoPlayerState.STOPPED) {
+        if (medxPlayerState != MedxPlayerState.STOPPED) {
             stop()
         }
         mediaSession.release()
@@ -332,13 +331,13 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
      *
      * @param state the state of audio player
      * */
-    override fun onVideoPlayerStateChanged(state: MedxVideoPlayerState) {
-        if (medxVideoPlayerState != state) {
+    override fun onPlayerStateChanged(state: MedxPlayerState) {
+        if (medxPlayerState != state) {
             Log.d(
                 this::class.java.simpleName,
-                "Medx-LOG %%% - audio state changed from $medxVideoPlayerState into $state"
+                "Medx-LOG %%% - audio state changed from $medxPlayerState into $state"
             )
-            _medxVideoPlayerState = state
+            _medxPlayerState = state
             listener?.onPlayerStateChanged(state)
         }
     }
@@ -347,21 +346,21 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
         super.onPlaybackStateChanged(playbackState)
         when (playbackState) {
             Player.STATE_IDLE -> {
-                onVideoPlayerStateChanged(MedxVideoPlayerState.READY)
+                onPlayerStateChanged(MedxPlayerState.READY)
             }
 
             Player.STATE_BUFFERING -> {
-                onVideoPlayerStateChanged(MedxVideoPlayerState.BUFFERING)
+                onPlayerStateChanged(MedxPlayerState.BUFFERING)
             }
 
             Player.STATE_READY -> {
                 _duration = exoPlayer.duration
                 listener?.onDurationChanged(duration)
-                onVideoPlayerStateChanged(MedxVideoPlayerState.READY)
+                onPlayerStateChanged(MedxPlayerState.READY)
             }
 
             Player.STATE_ENDED -> {
-                onVideoPlayerStateChanged(MedxVideoPlayerState.ENDED)
+                onPlayerStateChanged(MedxPlayerState.ENDED)
             }
         }
     }
@@ -369,18 +368,12 @@ abstract class BaseMedxVideoPlayer(private val context: Context) : IMedxVideoPla
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         super.onIsPlayingChanged(isPlaying)
         if (isPlaying) {
-            onVideoPlayerStateChanged(MedxVideoPlayerState.PLAYING)
+            onPlayerStateChanged(MedxPlayerState.PLAYING)
         }
     }
 
     override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
         super.onMediaMetadataChanged(mediaMetadata)
         listener?.onMediaMetadataChanged(mediaMetadata)
-    }
-
-    override fun onPlayerError(error: PlaybackException) {
-        super.onPlayerError(error)
-        Log.e(this::class.java.simpleName, "MedX-LOG %%% on player error, code:${error.errorCode}, codeName:${error.errorCodeName}, message:${error.message}")
-        listener?.onPlayerError(error)
     }
 }

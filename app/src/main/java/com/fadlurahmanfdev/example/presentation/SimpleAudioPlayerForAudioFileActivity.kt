@@ -16,12 +16,12 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
-import com.fadlurahmanfdev.medx_player.MedxAudioPlayer
-import com.fadlurahmanfdev.medx_player.base.IMedxAudioPlayerListener
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx_player.MedxPlayer
+import com.fadlurahmanfdev.medx_player.base.IMedxPlayerListener
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
 
-class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxAudioPlayerListener {
-    lateinit var medxAudioPlayer: MedxAudioPlayer
+class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxPlayerListener {
+    lateinit var medxAudioPlayer: MedxPlayer
 
     lateinit var seekBar: SeekBar
 
@@ -34,7 +34,7 @@ class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxAudioPla
 
     private lateinit var mediaItems: ArrayList<MediaItem>
 
-    private var audioState = MedxAudioPlayerState.IDLE
+    private var audioState = MedxPlayerState.IDLE
 
     val audioFilePickerLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriContents ->
         mediaItems = arrayListOf()
@@ -50,7 +50,7 @@ class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxAudioPla
             mediaItems.add(mediaItem)
         }
 
-        medxAudioPlayer.playAudio(mediaItems)
+        medxAudioPlayer.playMedia(mediaItems)
     }
 
     val filePermissionLauncher =
@@ -78,7 +78,7 @@ class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxAudioPla
             insets
         }
 
-        medxAudioPlayer = MedxAudioPlayer(this)
+        medxAudioPlayer = MedxPlayer(this)
         medxAudioPlayer.initialize()
 
         tvTitle.text = "-"
@@ -86,11 +86,11 @@ class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxAudioPla
 
         ivPlay.setOnClickListener {
             when (audioState) {
-                MedxAudioPlayerState.PLAYING -> {
+                MedxPlayerState.PLAYING -> {
                     medxAudioPlayer.pause()
                 }
 
-                MedxAudioPlayerState.PAUSED -> {
+                MedxPlayerState.PAUSED -> {
                     medxAudioPlayer.resume()
                 }
 
@@ -142,11 +142,11 @@ class SimpleAudioPlayerForAudioFileActivity : AppCompatActivity(), IMedxAudioPla
         medxAudioPlayer.release()
     }
 
-    override fun onPlayerStateChanged(state: MedxAudioPlayerState) {
+    override fun onPlayerStateChanged(state: MedxPlayerState) {
         super.onPlayerStateChanged(state)
         audioState = state
         when (state) {
-            MedxAudioPlayerState.BUFFERING, MedxAudioPlayerState.PLAYING -> {
+            MedxPlayerState.BUFFERING, MedxPlayerState.PLAYING -> {
                 ivPlay.setImageDrawable(
                     ContextCompat.getDrawable(
                         this,

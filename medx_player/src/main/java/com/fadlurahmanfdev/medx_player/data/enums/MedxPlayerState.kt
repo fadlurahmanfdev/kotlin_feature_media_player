@@ -1,6 +1,6 @@
 package com.fadlurahmanfdev.medx_player.data.enums
 
-enum class MedxAudioPlayerState {
+enum class MedxPlayerState {
     IDLE,
     BUFFERING,
     READY,

@@ -10,11 +10,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.ui.PlayerView
 import com.fadlurahmanfdev.example.R
-import com.fadlurahmanfdev.medx_player.MedxVideoPlayer
-import com.fadlurahmanfdev.medx_player.player.BaseMedxVideoPlayer
+import com.fadlurahmanfdev.medx_player.MedxPlayer
 
 class SimpleVideoPlayerActivity : AppCompatActivity() {
-    lateinit var medxVideoPlayer: BaseMedxVideoPlayer
+    lateinit var medxVideoPlayer: MedxPlayer
     lateinit var playerView: PlayerView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,11 +27,11 @@ class SimpleVideoPlayerActivity : AppCompatActivity() {
 
         playerView = findViewById<PlayerView>(R.id.playerView)
 
-        medxVideoPlayer = MedxVideoPlayer(this)
+        medxVideoPlayer = MedxPlayer(this)
         medxVideoPlayer.initialize()
         playerView.player = medxVideoPlayer.exoPlayer
 
-        medxVideoPlayer.playVideo(
+        medxVideoPlayer.playMedia(
             listOf(
                 MediaItem.Builder()
                     .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4".toUri())
@@ -44,5 +43,20 @@ class SimpleVideoPlayerActivity : AppCompatActivity() {
                     .build()
             )
         )
+    }
+
+    override fun onPause() {
+        medxVideoPlayer.pause()
+        super.onPause()
+    }
+
+    override fun onStop() {
+        medxVideoPlayer.stop()
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        medxVideoPlayer.release()
+        super.onDestroy()
     }
 }
