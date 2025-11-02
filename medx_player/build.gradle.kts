@@ -43,7 +43,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
 
-    val media3_version = "1.3.1"
+    val media3_version = "1.8.0"
     api("androidx.media3:media3-exoplayer:$media3_version")
     api("androidx.media3:media3-ui:$media3_version")
     api("androidx.media3:media3-common:$media3_version")
@@ -60,7 +60,7 @@ mavenPublishing {
 
     pom {
         name.set("Medx Player")
-        description.set("Library to simplify media player operation")
+        description.set("Media Player operation library for audio & video player")
         inceptionYear.set("2025")
         url.set("https://github.com/fadlurahmanfdev/kotlin_feature_media_player/")
         licenses {
