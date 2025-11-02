@@ -9,10 +9,10 @@ import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.datasource.cache.CacheDataSink
 import androidx.media3.datasource.cache.CacheDataSource
-import com.fadlurahmanfdev.medx_player.base.IMedxAudioResourceManager
+import com.fadlurahmanfdev.medx_player.base.IMedxResourceManager
 import com.fadlurahmanfdev.medx_player.utilities.MedxCacheUtilities
 
-class MedxAudioResourceManager : IMedxAudioResourceManager {
+class MedxResourceManager : IMedxResourceManager {
     /**
      * Create Default Datasource Factory.
      *

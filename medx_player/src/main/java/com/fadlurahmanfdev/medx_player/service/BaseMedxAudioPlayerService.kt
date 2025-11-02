@@ -12,23 +12,23 @@ import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
-import com.fadlurahmanfdev.medx_player.MedxAudioPlayer
-import com.fadlurahmanfdev.medx_player.base.IMedxAudioPlayerListener
+import com.fadlurahmanfdev.medx_player.MedxPlayer
+import com.fadlurahmanfdev.medx_player.base.IMedxPlayerListener
 import com.fadlurahmanfdev.medx_player.constant.MedxConstant
 import com.fadlurahmanfdev.medx_player.constant.MedxErrorConstant
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
 
 @UnstableApi
-abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener {
-    private lateinit var audioPlayer: MedxAudioPlayer
+abstract class BaseMedxAudioPlayerService : Service(), IMedxPlayerListener {
+    private lateinit var medxPlayer: MedxPlayer
 
     var notificationId: Int = -1
     private lateinit var mediaItems: List<MediaItem>
     lateinit var mediaMetadata: MediaMetadata
 
-    private var _medxAudioPlayerState: MedxAudioPlayerState = MedxAudioPlayerState.IDLE
-    val medxAudioPlayerState: MedxAudioPlayerState
-        get() = _medxAudioPlayerState
+    private var _medxPlayerState: MedxPlayerState = MedxPlayerState.IDLE
+    val medxPlayerState: MedxPlayerState
+        get() = _medxPlayerState
     private var _duration: Long = 0L
     val duration: Long
         get() = _duration
@@ -45,9 +45,9 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
     @UnstableApi
     override fun onCreate() {
         super.onCreate()
-        audioPlayer = MedxAudioPlayer(applicationContext)
-        audioPlayer.addListener(this)
-        audioPlayer.initialize()
+        medxPlayer = MedxPlayer(applicationContext)
+        medxPlayer.addListener(this)
+        medxPlayer.initialize()
 
         mediaSession = MediaSessionCompat(this, "BaseMedxAudioPlayerService")
 
@@ -125,7 +125,7 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
             mediaSession = mediaSession!!,
             onReady = { notification ->
                 startForeground(notificationId, notification)
-                audioPlayer.playAudio(mediaItems)
+                medxPlayer.playMedia(mediaItems)
             }
         )
     }
@@ -134,7 +134,7 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
      * Handle service when command pause remote audio.
      * */
     open fun onStartCommandPauseAudio(intent: Intent) {
-        audioPlayer.pause()
+        medxPlayer.pause()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_DETACH)
         } else {
@@ -146,7 +146,7 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
      * Handle service when command resume remote audio.
      * */
     open fun onStartCommandResumeAudio(intent: Intent) {
-        if (medxAudioPlayerState == MedxAudioPlayerState.PAUSED) {
+        if (medxPlayerState == MedxPlayerState.PAUSED) {
             notificationId = intent.getIntExtra(MedxConstant.PARAM_NOTIFICATION_ID, -1)
 
             if (notificationId == -1) {
@@ -163,23 +163,23 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
                 mediaSession = mediaSession!!,
                 onReady = { notification ->
                     startForeground(notificationId, notification)
-                    audioPlayer.resume()
+                    medxPlayer.resume()
                 }
             )
         } else {
             Log.i(
                 this::class.java.simpleName,
-                "Medx-LOG %%% - unable to resume audio, current audio player state is $medxAudioPlayerState"
+                "Medx-LOG %%% - unable to resume audio, current audio player state is $medxPlayerState"
             )
         }
     }
 
     open fun onStartCommandSkipToPreviousAudio(intent: Intent) {
-        audioPlayer.skipToPreviousMediaItem()
+        medxPlayer.skipToPreviousMediaItem()
     }
 
     open fun onStartCommandSkipToNextAudio(intent: Intent) {
-        audioPlayer.skipToNextMediaItem()
+        medxPlayer.skipToNextMediaItem()
     }
 
     open fun onStartCommandSeekToPosition(intent: Intent) {
@@ -192,7 +192,7 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
             return
         }
 
-        audioPlayer.seekToPosition(position)
+        medxPlayer.seekToPosition(position)
     }
 
 
@@ -207,7 +207,7 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
     override fun onDestroy() {
         mediaSession?.release()
         mediaSession = null
-        audioPlayer.release()
+        medxPlayer.release()
         super.onDestroy()
     }
 
@@ -218,13 +218,13 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
         sendBroadcastSendPositionInfo()
     }
 
-    override fun onPlayerStateChanged(state: MedxAudioPlayerState) {
+    override fun onPlayerStateChanged(state: MedxPlayerState) {
         super.onPlayerStateChanged(state)
         Log.d(
             this::class.java.simpleName,
             "Medx-LOG %%% - on audio player state changed into $state"
         )
-        _medxAudioPlayerState = state
+        _medxPlayerState = state
         sendBroadcastSendAudioStateInfo()
     }
 
@@ -260,9 +260,10 @@ abstract class BaseMedxAudioPlayerService : Service(), IMedxAudioPlayerListener 
     private fun sendBroadcastSendAudioStateInfo() {
         val intent = Intent().apply {
             action = MedxConstant.ACTION_AUDIO_STATE_INFO
-            putExtra(MedxConstant.PARAM_STATE, medxAudioPlayerState.name)
+            putExtra(MedxConstant.PARAM_STATE, medxPlayerState.name)
         }
         applicationContext.sendBroadcast(intent)
+        Log.d(this::class.java.simpleName, "MedX-LOG %%% - successfully send broadcast audio state: ${medxPlayerState.name}")
     }
 
     private fun sendBroadcastSendAudioMediaMetaDataInfo() {

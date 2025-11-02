@@ -10,18 +10,20 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
-import com.fadlurahmanfdev.medx_player.MedxAudioPlayer
-import com.fadlurahmanfdev.medx_player.base.IMedxAudioPlayerListener
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx_player.MedxPlayer
+import com.fadlurahmanfdev.medx_player.base.IMedxPlayerListener
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
+import com.fadlurahmanfdev.medx_player.utilities.MedxPlayerUtilities
 
-class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxAudioPlayerListener {
-    lateinit var medxAudioPlayer: MedxAudioPlayer
+class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxPlayerListener {
+    lateinit var medxAudioPlayer: MedxPlayer
 
     lateinit var seekBar: SeekBar
 
@@ -32,9 +34,12 @@ class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxAudioPlayerListener 
     lateinit var ivPlay: ImageView
     lateinit var ivNext: ImageView
 
+    lateinit var tvProgress: TextView
+    lateinit var tvDuration: TextView
+
     private lateinit var mediaItems: List<MediaItem>
 
-    private var audioState = MedxAudioPlayerState.IDLE
+    private var audioState = MedxPlayerState.IDLE
 
     @UnstableApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,31 +52,36 @@ class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxAudioPlayerListener 
         ivPrevious = findViewById(R.id.iv_previous)
         ivPlay = findViewById(R.id.iv_play)
         ivNext = findViewById(R.id.iv_next)
+        tvProgress = findViewById(R.id.tv_progress)
+        tvDuration = findViewById(R.id.tv_duration)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        medxAudioPlayer = MedxAudioPlayer(this)
+        medxAudioPlayer = MedxPlayer(this)
         medxAudioPlayer.initialize()
 
         mediaItems = listOf(
             MediaItem.Builder()
-                .setUri(Uri.parse("https://www.bensound.com/bensound-music/bensound-acousticbreeze.mp3"))
+                .setUri("https://www.bensound.com/bensound-music/bensound-acousticbreeze.mp3".toUri())
                 .setMediaMetadata(
                     MediaMetadata.Builder().setTitle("Acoustic Breeze").setArtist("Bensound")
                         .setArtworkUri(Uri.parse("https://www.bensound.com/bensound-img/acousticbreeze.jpg"))
-                        .setMediaType(MediaMetadata.MEDIA_TYPE_AUDIO_BOOK_CHAPTER)
+                        .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
                         .build()
                 )
                 .build(),
             MediaItem.Builder()
-                .setUri(Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).path(R.raw.bensound_creativeminds.toString()).build())
+                .setUri(
+                    Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                        .path(R.raw.bensound_creativeminds.toString()).build()
+                )
                 .setMediaMetadata(
                     MediaMetadata.Builder().setTitle("Creative Minds").setArtist("Bensound")
-                        .setArtworkUri(Uri.parse("https://www.bensound.com/bensound-img/creativeminds.jpg"))
-                        .setMediaType(MediaMetadata.MEDIA_TYPE_AUDIO_BOOK_CHAPTER)
+                        .setArtworkUri("https://www.bensound.com/bensound-img/creativeminds.jpg".toUri())
+                        .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
                         .build()
                 )
                 .build(),
@@ -82,11 +92,11 @@ class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxAudioPlayerListener 
 
         ivPlay.setOnClickListener {
             when (audioState) {
-                MedxAudioPlayerState.PLAYING -> {
+                MedxPlayerState.PLAYING -> {
                     medxAudioPlayer.pause()
                 }
 
-                MedxAudioPlayerState.PAUSED -> {
+                MedxPlayerState.PAUSED -> {
                     medxAudioPlayer.resume()
                 }
 
@@ -97,7 +107,11 @@ class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxAudioPlayerListener 
         }
 
         ivPrevious.setOnClickListener {
-            medxAudioPlayer.skipToPreviousMediaItem()
+            if (medxAudioPlayer.position >= 3L) {
+                medxAudioPlayer.seekToPosition(0L)
+            } else if (medxAudioPlayer.hasPreviousMediaItem()) {
+                medxAudioPlayer.skipToPreviousMediaItem()
+            }
         }
 
         ivNext.setOnClickListener {
@@ -127,7 +141,7 @@ class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxAudioPlayerListener 
 
         medxAudioPlayer.addListener(this)
 
-        medxAudioPlayer.playAudio(mediaItems)
+        medxAudioPlayer.playMedia(mediaItems)
     }
 
     override fun onDestroy() {
@@ -136,11 +150,14 @@ class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxAudioPlayerListener 
         medxAudioPlayer.release()
     }
 
-    override fun onPlayerStateChanged(state: MedxAudioPlayerState) {
+    override fun onPlayerStateChanged(state: MedxPlayerState) {
         super.onPlayerStateChanged(state)
         audioState = state
         when (state) {
-            MedxAudioPlayerState.BUFFERING, MedxAudioPlayerState.PLAYING -> {
+            MedxPlayerState.READY -> {
+                tvDuration.text = MedxPlayerUtilities.formatDuration(medxAudioPlayer.duration)
+            }
+            MedxPlayerState.BUFFERING, MedxPlayerState.PLAYING -> {
                 ivPlay.setImageDrawable(
                     ContextCompat.getDrawable(
                         this,
@@ -159,7 +176,7 @@ class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxAudioPlayerListener 
             }
         }
 
-        Log.d(this::class.java.simpleName, "Medx-LOG %%% - receive info state: $state")
+        Log.d(this::class.java.simpleName, "App-Medx-LOG %%% - receive info state: $state")
     }
 
     override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
@@ -176,6 +193,8 @@ class SimpleAudioPlayerActivity : AppCompatActivity(), IMedxAudioPlayerListener 
     override fun onPositionChanged(position: Long) {
         super.onPositionChanged(position)
         seekBar.progress = position.toInt()
+        val readableTime = MedxPlayerUtilities.formatDuration(position)
+        tvProgress.text = readableTime
     }
 
     override fun onPause() {

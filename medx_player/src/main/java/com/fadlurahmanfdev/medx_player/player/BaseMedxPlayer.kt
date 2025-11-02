@@ -17,18 +17,18 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.session.MediaSession
-import com.fadlurahmanfdev.medx_player.MedxAudioResourceManager
-import com.fadlurahmanfdev.medx_player.base.IMedxAudioPlayer
-import com.fadlurahmanfdev.medx_player.base.IMedxAudioPlayerListener
-import com.fadlurahmanfdev.medx_player.base.IMedxAudioResourceManager
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx_player.MedxResourceManager
+import com.fadlurahmanfdev.medx_player.base.IMedxPlayer
+import com.fadlurahmanfdev.medx_player.base.IMedxPlayerListener
+import com.fadlurahmanfdev.medx_player.base.IMedxResourceManager
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
 
 /**
  * Base class for playing an audio from remote, resources, etc.
  * */
-abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPlayer,
+abstract class BaseMedxPlayer(private val context: Context) : IMedxPlayer,
     Player.Listener {
-    override val medxAudioResourceManager: IMedxAudioResourceManager = MedxAudioResourceManager()
+    override val medxResourceManager: IMedxResourceManager = MedxResourceManager()
     override lateinit var exoPlayer: ExoPlayer
     override lateinit var mediaSession: MediaSession
 
@@ -37,7 +37,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
     /**
      * Duration of audio.
      *
-     * The duration of audio will be available when [MedxAudioPlayerState] is [MedxAudioPlayerState.READY]
+     * The duration of audio will be available when [MedxPlayerState] is [MedxPlayerState.READY]
      * otherwise it will always return 0
      * */
     override val duration: Long
@@ -47,24 +47,24 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
     /**
      * Position of currently audio playing.
      *
-     * The position of audio fetched from observe audio position by calling [listenAudioPosition].
+     * The position of audio fetched from observe audio position by calling [listenPosition].
      * By default, it will listen an audio position after playing an audio.
      * */
     override val position: Long
         get() = _position
 
 
-    override var _medxAudioPlayerState: MedxAudioPlayerState = MedxAudioPlayerState.IDLE
+    override var _medxPlayerState: MedxPlayerState = MedxPlayerState.IDLE
 
     /**
-     * The player state of audio player (e.g., [MedxAudioPlayerState.IDLE], [MedxAudioPlayerState.PLAYING], [MedxAudioPlayerState.BUFFERING], etc).
+     * The player state of audio player (e.g., [MedxPlayerState.IDLE], [MedxPlayerState.PLAYING], [MedxPlayerState.BUFFERING], etc).
      *
-     * @see MedxAudioPlayerState
+     * @see MedxPlayerState
      * */
-    override val medxAudioPlayerState: MedxAudioPlayerState
-        get() = _medxAudioPlayerState
+    override val medxPlayerState: MedxPlayerState
+        get() = _medxPlayerState
 
-    override var listener: IMedxAudioPlayerListener? = null
+    override var listener: IMedxPlayerListener? = null
 
     private val handler = Handler(Looper.getMainLooper())
     private val audioPositionRunnable = object : Runnable {
@@ -77,7 +77,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
         }
     }
 
-    override fun addListener(listener: IMedxAudioPlayerListener) {
+    override fun addListener(listener: IMedxPlayerListener) {
         this.listener = listener
     }
 
@@ -98,7 +98,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
                     override fun onMediaButtonEvent(
                         session: MediaSession,
                         controllerInfo: MediaSession.ControllerInfo,
-                        intent: Intent
+                        intent: Intent,
                     ): Boolean {
                         Log.d(
                             this::class.java.simpleName,
@@ -127,11 +127,11 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
                             if (keyEvent != null) {
                                 when (keyEvent.keyCode) {
                                     KeyEvent.KEYCODE_MEDIA_PAUSE -> {
-                                        onAudioPlayerStateChanged(MedxAudioPlayerState.PAUSED)
+                                        onPlayerStateChanged(MedxPlayerState.PAUSED)
                                     }
 
                                     KeyEvent.KEYCODE_MEDIA_PLAY -> {
-                                        onAudioPlayerStateChanged(MedxAudioPlayerState.PLAYING)
+                                        onPlayerStateChanged(MedxPlayerState.PLAYING)
                                     }
                                 }
                             }
@@ -145,14 +145,14 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
     /**
      * Listening audio position changed every n seconds.
      * */
-    open fun listenAudioPosition() {
+    open fun listenPosition() {
         handler.postDelayed(audioPositionRunnable, 250)
     }
 
     /**
      * Remove listener audio position changed every n seconds.
      * */
-    fun removeListenerAudioPosition() {
+    fun removeListenerPosition() {
         handler.removeCallbacks(audioPositionRunnable)
     }
 
@@ -161,11 +161,15 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
      *
      * @param mediaItems list of media item that want to be played.
      *
-     * @see [MedxAudioResourceManager.httpDatasourceFactory]
+     * @see [MedxResourceManager.httpDatasourceFactory]
      * */
     @OptIn(UnstableApi::class)
-    override fun playAudio(mediaItems: List<MediaItem>) {
+    override fun playMedia(mediaItems: List<MediaItem>) {
         val mediaSources = arrayListOf<MediaSource>()
+        Log.d(
+            this::class.java.simpleName,
+            "Medx-LOG %%% received total ${mediaItems.size} media items to play"
+        )
         repeat(mediaItems.size) { index ->
             val mediaItem = mediaItems[index]
             val dataSourceFactory: DataSource.Factory
@@ -173,9 +177,9 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
             when (mediaItem.localConfiguration?.uri?.scheme) {
                 "http", "https" -> {
                     dataSourceFactory =
-                        medxAudioResourceManager.httpDatasourceFactory()
+                        medxResourceManager.httpDatasourceFactory()
                     val cacheDataSourceFactory =
-                        medxAudioResourceManager.cacheDatasourceFactory(context, dataSourceFactory)
+                        medxResourceManager.cacheDatasourceFactory(context, dataSourceFactory)
                     mediaSource =
                         ProgressiveMediaSource.Factory(cacheDataSourceFactory)
                             .createMediaSource(mediaItem)
@@ -183,7 +187,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
 
                 "android.resource" -> {
                     dataSourceFactory =
-                        medxAudioResourceManager.rawDatasourceFactory(context)
+                        medxResourceManager.rawDatasourceFactory(context)
                     mediaSource =
                         ProgressiveMediaSource.Factory(dataSourceFactory)
                             .createMediaSource(mediaItem)
@@ -191,7 +195,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
 
                 "file" -> {
                     dataSourceFactory =
-                        medxAudioResourceManager.fileDatasourceFactory()
+                        medxResourceManager.fileDatasourceFactory()
                     mediaSource =
                         ProgressiveMediaSource.Factory(dataSourceFactory)
                             .createMediaSource(mediaItem)
@@ -199,7 +203,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
 
                 else -> {
                     dataSourceFactory =
-                        medxAudioResourceManager.defaultDatasourceFactory(context)
+                        medxResourceManager.defaultDatasourceFactory(context)
                     mediaSource =
                         ProgressiveMediaSource.Factory(dataSourceFactory)
                             .createMediaSource(mediaItem)
@@ -210,7 +214,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
         exoPlayer.setMediaSources(mediaSources)
         exoPlayer.playWhenReady = true
         exoPlayer.prepare()
-        listenAudioPosition()
+        listenPosition()
     }
 
     /**
@@ -218,10 +222,10 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
      *
      * */
     override fun pause() {
-        if (medxAudioPlayerState == MedxAudioPlayerState.PLAYING) {
-            removeListenerAudioPosition()
+        if (medxPlayerState == MedxPlayerState.PLAYING) {
+            removeListenerPosition()
             exoPlayer.pause()
-            onAudioPlayerStateChanged(MedxAudioPlayerState.PAUSED)
+            onPlayerStateChanged(MedxPlayerState.PAUSED)
         }
     }
 
@@ -230,10 +234,10 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
      *
      * */
     override fun resume() {
-        if (medxAudioPlayerState == MedxAudioPlayerState.PAUSED) {
+        if (medxPlayerState == MedxPlayerState.PAUSED) {
             exoPlayer.play()
-            onAudioPlayerStateChanged(MedxAudioPlayerState.PLAYING)
-            listenAudioPosition()
+            onPlayerStateChanged(MedxPlayerState.PLAYING)
+            listenPosition()
         }
     }
 
@@ -242,23 +246,28 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
      *
      * */
     override fun stop() {
-        if (medxAudioPlayerState == MedxAudioPlayerState.PLAYING || medxAudioPlayerState == MedxAudioPlayerState.STOPPED) {
-            removeListenerAudioPosition()
+        if (medxPlayerState == MedxPlayerState.PLAYING || medxPlayerState == MedxPlayerState.STOPPED) {
+            removeListenerPosition()
             exoPlayer.stop()
-            onAudioPlayerStateChanged(MedxAudioPlayerState.STOPPED)
+            onPlayerStateChanged(MedxPlayerState.STOPPED)
         }
     }
+
+    /**
+     * check if the player has previous media item
+     * */
+    override fun hasPreviousMediaItem(): Boolean = exoPlayer.hasPreviousMediaItem()
 
     /**
      * skip to previous media item if there is any previous media item.
      *
      * to enable skip to previous media item, add multiple audio when play an audio
      *
-     * @see playAudio
+     * @see playMedia
      * @author @fadlurahmanfdev - Taufik Fadlurahman Fajari
      * */
     override fun skipToPreviousMediaItem() {
-        if (exoPlayer.hasPreviousMediaItem()) {
+        if (hasPreviousMediaItem()) {
             exoPlayer.seekToPreviousMediaItem()
             _position = 0L
         } else {
@@ -270,15 +279,20 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
     }
 
     /**
+     * check if the player has next media item
+     * */
+    override fun hasNextMediaItem(): Boolean = exoPlayer.hasNextMediaItem()
+
+    /**
      * skip to next media item if there is any next media item
      *
      * to enable skip to next media item, add multiple audio when play an audio
      *
-     * @see playAudio
+     * @see playMedia
      * @author @fadlurahmanfdev - Taufik Fadlurahman Fajari
      * */
     override fun skipToNextMediaItem() {
-        if (exoPlayer.hasNextMediaItem()) {
+        if (hasNextMediaItem()) {
             exoPlayer.seekToNextMediaItem()
             _position = 0L
         } else {
@@ -305,7 +319,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
      *
      * */
     override fun release() {
-        if (medxAudioPlayerState != MedxAudioPlayerState.STOPPED) {
+        if (medxPlayerState != MedxPlayerState.STOPPED) {
             stop()
         }
         mediaSession.release()
@@ -317,13 +331,13 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
      *
      * @param state the state of audio player
      * */
-    override fun onAudioPlayerStateChanged(state: MedxAudioPlayerState) {
-        if (medxAudioPlayerState != state) {
+    override fun onPlayerStateChanged(state: MedxPlayerState) {
+        if (medxPlayerState != state) {
             Log.d(
                 this::class.java.simpleName,
-                "Medx-LOG %%% - audio state changed from $medxAudioPlayerState into $state"
+                "Medx-LOG %%% - audio state changed from $medxPlayerState into $state"
             )
-            _medxAudioPlayerState = state
+            _medxPlayerState = state
             listener?.onPlayerStateChanged(state)
         }
     }
@@ -332,21 +346,21 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
         super.onPlaybackStateChanged(playbackState)
         when (playbackState) {
             Player.STATE_IDLE -> {
-                onAudioPlayerStateChanged(MedxAudioPlayerState.READY)
+                onPlayerStateChanged(MedxPlayerState.READY)
             }
 
             Player.STATE_BUFFERING -> {
-                onAudioPlayerStateChanged(MedxAudioPlayerState.BUFFERING)
+                onPlayerStateChanged(MedxPlayerState.BUFFERING)
             }
 
             Player.STATE_READY -> {
                 _duration = exoPlayer.duration
                 listener?.onDurationChanged(duration)
-                onAudioPlayerStateChanged(MedxAudioPlayerState.READY)
+                onPlayerStateChanged(MedxPlayerState.READY)
             }
 
             Player.STATE_ENDED -> {
-                onAudioPlayerStateChanged(MedxAudioPlayerState.ENDED)
+                onPlayerStateChanged(MedxPlayerState.ENDED)
             }
         }
     }
@@ -354,7 +368,7 @@ abstract class BaseMedxAudioPlayer(private val context: Context) : IMedxAudioPla
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         super.onIsPlayingChanged(isPlaying)
         if (isPlaying) {
-            onAudioPlayerStateChanged(MedxAudioPlayerState.PLAYING)
+            onPlayerStateChanged(MedxPlayerState.PLAYING)
         }
     }
 

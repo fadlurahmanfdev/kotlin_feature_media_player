@@ -1,5 +1,7 @@
 package com.fadlurahmanfdev.medx_player.utilities
 
+import java.util.concurrent.TimeUnit
+
 class MedxPlayerUtilities {
     companion object {
         fun formatToReadableTime(millis: Long): String {
@@ -27,6 +29,17 @@ class MedxPlayerUtilities {
                 "$formattedMinutes:$formattedSeconds"
             }
 
+        }
+
+        fun formatDuration(durationMs: Long): String {
+            val hours = TimeUnit.MILLISECONDS.toHours(durationMs)
+            val minutes = TimeUnit.MILLISECONDS.toMinutes(durationMs) % 60
+            val seconds = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
+
+            return if (hours > 0)
+                String.format("%02d:%02d:%02d", hours, minutes, seconds)
+            else
+                String.format("%02d:%02d", minutes, seconds)
         }
     }
 }

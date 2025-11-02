@@ -1,15 +1,15 @@
 package com.fadlurahmanfdev.medx_player.base
 
 import androidx.media3.common.MediaMetadata
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
 
-interface IMedxAudioPlayerListener {
+interface IMedxPlayerListener {
     /**
      * this function triggered when state of audio player changed.
      *
-     * @param state the state of the playback (e.g., [MedxAudioPlayerState.IDLE], [MedxAudioPlayerState.BUFFERING], etc)
+     * @param state the state of the playback (e.g., [MedxPlayerState.IDLE], [MedxPlayerState.BUFFERING], etc)
      * */
-    fun onPlayerStateChanged(state: MedxAudioPlayerState) {}
+    fun onPlayerStateChanged(state: MedxPlayerState) {}
     /**
      * Triggered when the duration of a media item is available or changed.
      *

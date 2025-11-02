@@ -17,14 +17,15 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.service.AppMedxAudioPlayerService
-import com.fadlurahmanfdev.medx_player.MedxAudioPlayerManager
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState.BUFFERING
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState.PAUSED
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState.PLAYING
+import com.fadlurahmanfdev.medx_player.MedxPlayerManager
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState.BUFFERING
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState.PAUSED
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState.PLAYING
+import com.fadlurahmanfdev.medx_player.utilities.MedxPlayerUtilities
 
-class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlayerManager.Listener {
-    lateinit var medxAudioPlayerManager: MedxAudioPlayerManager
+class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerManager.Listener {
+    lateinit var medxAudioPlayerManager: MedxPlayerManager
 
     lateinit var seekBar: SeekBar
 
@@ -34,10 +35,12 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
     lateinit var ivPrevious: ImageView
     lateinit var ivPlay: ImageView
     lateinit var ivNext: ImageView
+    lateinit var tvPosition: TextView
+    lateinit var tvDuration: TextView
 
     private lateinit var mediaItems: List<MediaItem>
 
-    private var audioState = MedxAudioPlayerState.IDLE
+    private var audioState = MedxPlayerState.IDLE
 
     @UnstableApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,11 +53,15 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
         ivPrevious = findViewById(R.id.iv_previous)
         ivPlay = findViewById(R.id.iv_play)
         ivNext = findViewById(R.id.iv_next)
+        tvPosition = findViewById(R.id.tv_progress)
+        tvDuration = findViewById(R.id.tv_duration)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+
 
         mediaItems = listOf(
             MediaItem.Builder()
@@ -80,17 +87,21 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
         tvTitle.text = "-"
         tvArtist.text = "-"
 
+        medxAudioPlayerManager = MedxPlayerManager(this)
+        medxAudioPlayerManager.registerReceiver(this)
+        medxAudioPlayerManager.addListener(this)
+
         ivPlay.setOnClickListener {
             when (audioState) {
                 PLAYING -> {
-                    MedxAudioPlayerManager.pause(
+                    MedxPlayerManager.pause(
                         this,
                         AppMedxAudioPlayerService::class.java
                     )
                 }
 
                 PAUSED -> {
-                    MedxAudioPlayerManager.resume(
+                    MedxPlayerManager.resume(
                         this,
                         notificationId = 1,
                         AppMedxAudioPlayerService::class.java
@@ -104,14 +115,14 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
         }
 
         ivPrevious.setOnClickListener {
-            MedxAudioPlayerManager.skipToPrevious(
+            MedxPlayerManager.skipToPrevious(
                 context = this,
                 AppMedxAudioPlayerService::class.java
             )
         }
 
         ivNext.setOnClickListener {
-            MedxAudioPlayerManager.skipToNext(context = this, AppMedxAudioPlayerService::class.java)
+            MedxPlayerManager.skipToNext(context = this, AppMedxAudioPlayerService::class.java)
         }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -121,7 +132,7 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
                         this@ForegroundServiceAudioPlayerActivity::class.java.simpleName,
                         "on progress changed: $progress"
                     )
-                    MedxAudioPlayerManager.seekToPosition(
+                    MedxPlayerManager.seekToPosition(
                         this@ForegroundServiceAudioPlayerActivity,
                         progress.toLong(),
                         AppMedxAudioPlayerService::class.java
@@ -139,12 +150,8 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
 
         })
 
-        medxAudioPlayerManager = MedxAudioPlayerManager(this)
-        medxAudioPlayerManager.registerReceiver(this)
-        medxAudioPlayerManager.addListener(this)
 
-
-        MedxAudioPlayerManager.playAudio(
+        MedxPlayerManager.playAudio(
             this,
             notificationId = 1,
             mediaItems = mediaItems,
@@ -160,14 +167,17 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxAudioPlaye
     override fun onReceiveInfoDuration(duration: Long) {
         Log.d(this::class.java.simpleName, "Medx-LOG %%% - receive info duration: $duration")
         seekBar.max = duration.toInt()
+        tvDuration.text = MedxPlayerUtilities.formatDuration(duration)
     }
 
     override fun onReceiveInfoPosition(position: Long) {
         seekBar.progress = position.toInt()
+        tvPosition.text = MedxPlayerUtilities.formatDuration(position)
     }
 
-    override fun onReceiveInfoState(state: MedxAudioPlayerState) {
+    override fun onReceiveInfoState(state: MedxPlayerState) {
         audioState = state
+        Log.d(this::class.java.simpleName, "App-MedX-LOG %%% on receive info state: $state")
         when (state) {
             BUFFERING, PLAYING -> {
                 ivPlay.setImageDrawable(

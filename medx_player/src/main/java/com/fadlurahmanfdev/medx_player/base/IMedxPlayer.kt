@@ -3,10 +3,10 @@ package com.fadlurahmanfdev.medx_player.base
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
 
-interface IMedxAudioPlayer {
-    val medxAudioResourceManager: IMedxAudioResourceManager
+interface IMedxPlayer {
+    val medxResourceManager: IMedxResourceManager
 
     var exoPlayer: ExoPlayer
     var mediaSession: MediaSession
@@ -17,26 +17,28 @@ interface IMedxAudioPlayer {
     val position: Long
         get() = _position
 
-    var _medxAudioPlayerState: MedxAudioPlayerState
-    val medxAudioPlayerState: MedxAudioPlayerState
-        get() = _medxAudioPlayerState
+    var _medxPlayerState: MedxPlayerState
+    val medxPlayerState: MedxPlayerState
+        get() = _medxPlayerState
 
-    var listener: IMedxAudioPlayerListener?
+    var listener: IMedxPlayerListener?
 
 
     fun initialize()
-    fun addListener(listener: IMedxAudioPlayerListener)
+    fun addListener(listener: IMedxPlayerListener)
 
     fun removeListener()
 
-    fun playAudio(mediaItems: List<MediaItem>)
+    fun playMedia(mediaItems: List<MediaItem>)
     fun pause()
     fun resume()
     fun stop()
+    fun hasPreviousMediaItem(): Boolean
     fun skipToPreviousMediaItem()
+    fun hasNextMediaItem(): Boolean
     fun skipToNextMediaItem()
     fun seekToPosition(position: Long)
     fun release()
 
-    fun onAudioPlayerStateChanged(state: MedxAudioPlayerState)
+    fun onPlayerStateChanged(state: MedxPlayerState)
 }

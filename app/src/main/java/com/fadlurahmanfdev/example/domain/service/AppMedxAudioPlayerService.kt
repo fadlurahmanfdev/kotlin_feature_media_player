@@ -14,7 +14,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.fadlurahmanfdev.example.data.repository.AppMedxNotification
 import com.fadlurahmanfdev.example.data.repository.AppMedxNotificationRepository
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
 import com.fadlurahmanfdev.medx_player.service.BaseMedxAudioPlayerService
 
 @OptIn(UnstableApi::class)
@@ -112,7 +112,7 @@ class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
         updateNotification()
     }
 
-    override fun onPlayerStateChanged(state: MedxAudioPlayerState) {
+    override fun onPlayerStateChanged(state: MedxPlayerState) {
         super.onPlayerStateChanged(state)
         updateNotification()
     }
@@ -121,11 +121,11 @@ class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
     private fun updateNotification() {
         if (mediaSession == null) return
 
-        val playbackStateCompat = when (medxAudioPlayerState) {
-            MedxAudioPlayerState.IDLE, MedxAudioPlayerState.BUFFERING, MedxAudioPlayerState.READY, MedxAudioPlayerState.PLAYING -> PlaybackStateCompat.STATE_PLAYING
-            MedxAudioPlayerState.PAUSED -> PlaybackStateCompat.STATE_PAUSED
-            MedxAudioPlayerState.STOPPED -> PlaybackStateCompat.STATE_STOPPED
-            MedxAudioPlayerState.ENDED -> PlaybackStateCompat.STATE_STOPPED
+        val playbackStateCompat = when (medxPlayerState) {
+            MedxPlayerState.IDLE, MedxPlayerState.BUFFERING, MedxPlayerState.READY, MedxPlayerState.PLAYING -> PlaybackStateCompat.STATE_PLAYING
+            MedxPlayerState.PAUSED -> PlaybackStateCompat.STATE_PAUSED
+            MedxPlayerState.STOPPED -> PlaybackStateCompat.STATE_STOPPED
+            MedxPlayerState.ENDED -> PlaybackStateCompat.STATE_STOPPED
         }
 
         appMedxNotificationRepository.updateMediaNotification(

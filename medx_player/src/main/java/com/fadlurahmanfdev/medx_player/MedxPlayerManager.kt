@@ -13,18 +13,18 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.fadlurahmanfdev.medx_player.constant.MedxConstant
-import com.fadlurahmanfdev.medx_player.data.enums.MedxAudioPlayerState
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
 import com.fadlurahmanfdev.medx_player.receiver.BaseMedxAudioPlayerReceiver
 import com.fadlurahmanfdev.medx_player.service.BaseMedxAudioPlayerService
 
-class MedxAudioPlayerManager(val context: Context) {
+class MedxPlayerManager(val context: Context) {
     companion object {
         @UnstableApi
         fun <T : BaseMedxAudioPlayerService> playAudio(
             context: Context,
             notificationId: Int,
             mediaItems: List<MediaItem>,
-            clazz: Class<T>
+            clazz: Class<T>,
         ) {
             val intent = Intent(context, clazz)
             val bundleMediaItems = ArrayList(mediaItems.map { mediaItem ->
@@ -38,10 +38,10 @@ class MedxAudioPlayerManager(val context: Context) {
             ContextCompat.startForegroundService(context, intent)
         }
 
-        @UnstableApi
+
         fun <T : BaseMedxAudioPlayerService> pause(
             context: Context,
-            clazz: Class<T>
+            clazz: Class<T>,
         ) {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -54,7 +54,7 @@ class MedxAudioPlayerManager(val context: Context) {
         fun <T : BaseMedxAudioPlayerService> resume(
             context: Context,
             notificationId: Int,
-            clazz: Class<T>
+            clazz: Class<T>,
         ) {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -66,7 +66,7 @@ class MedxAudioPlayerManager(val context: Context) {
 
         fun <T : BaseMedxAudioPlayerService> skipToPrevious(
             context: Context,
-            clazz: Class<T>
+            clazz: Class<T>,
         ) {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -77,7 +77,7 @@ class MedxAudioPlayerManager(val context: Context) {
 
         fun <T : BaseMedxAudioPlayerService> skipToNext(
             context: Context,
-            clazz: Class<T>
+            clazz: Class<T>,
         ) {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -89,7 +89,7 @@ class MedxAudioPlayerManager(val context: Context) {
         fun <T : BaseMedxAudioPlayerService> seekToPosition(
             context: Context,
             position: Long,
-            clazz: Class<T>
+            clazz: Class<T>,
         ) {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -102,7 +102,7 @@ class MedxAudioPlayerManager(val context: Context) {
         fun <T : BaseMedxAudioPlayerReceiver> getPauseAudioPendingIntent(
             context: Context,
             requestCode: Int,
-            clazz: Class<T>
+            clazz: Class<T>,
         ): PendingIntent {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -119,7 +119,7 @@ class MedxAudioPlayerManager(val context: Context) {
         fun <T : BaseMedxAudioPlayerReceiver> getSkipToPreviousAudioPendingIntent(
             context: Context,
             requestCode: Int,
-            clazz: Class<T>
+            clazz: Class<T>,
         ): PendingIntent {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -136,7 +136,7 @@ class MedxAudioPlayerManager(val context: Context) {
         fun <T : BaseMedxAudioPlayerReceiver> getSkipToNextAudioPendingIntent(
             context: Context,
             requestCode: Int,
-            clazz: Class<T>
+            clazz: Class<T>,
         ): PendingIntent {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -154,7 +154,7 @@ class MedxAudioPlayerManager(val context: Context) {
             context: Context,
             requestCode: Int,
             notificationId: Int,
-            clazz: Class<T>
+            clazz: Class<T>,
         ): PendingIntent {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -173,7 +173,7 @@ class MedxAudioPlayerManager(val context: Context) {
             context: Context,
             notificationId: Int,
             position: Long,
-            clazz: Class<T>
+            clazz: Class<T>,
         ) {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -186,7 +186,7 @@ class MedxAudioPlayerManager(val context: Context) {
 
         fun <T : BaseMedxAudioPlayerReceiver> getNonePendingIntent(
             context: Context,
-            clazz: Class<T>
+            clazz: Class<T>,
         ): PendingIntent {
             val intent = Intent(context, clazz)
             intent.apply {
@@ -221,7 +221,7 @@ class MedxAudioPlayerManager(val context: Context) {
             } catch (e: Throwable) {
                 Log.e(
                     this::class.java.simpleName,
-                    "Medx-LOG %%% - failed to receive audio duration info",
+                    "MedX-LOG %%% - failed to receive audio duration info",
                     e
                 )
             }
@@ -239,7 +239,7 @@ class MedxAudioPlayerManager(val context: Context) {
             } catch (e: Throwable) {
                 Log.e(
                     this::class.java.simpleName,
-                    "Medx-LOG %%% - failed to receive audio position info",
+                    "MedX-LOG %%% - failed to receive audio position info",
                     e
                 )
             }
@@ -252,11 +252,11 @@ class MedxAudioPlayerManager(val context: Context) {
             try {
                 val stateString = intent?.getStringExtra(MedxConstant.PARAM_STATE)
                 if (stateString != null) {
-                    val state = MedxAudioPlayerState.valueOf(stateString)
+                    val state = MedxPlayerState.valueOf(stateString)
                     listener?.onReceiveInfoState(state)
                 }
             } catch (e: Throwable) {
-                Log.e(this::class.java.simpleName, "Medx-LOG %%% - failed to receive audio info", e)
+                Log.e(this::class.java.simpleName, "MedX-LOG %%% - failed to receive audio info", e)
             }
         }
     }
@@ -279,13 +279,13 @@ class MedxAudioPlayerManager(val context: Context) {
                 val mediaMetadata = builder.build()
                 Log.d(
                     this::class.java.simpleName,
-                    "Medx-LOG %%% - media meta data changed ${mediaMetadata.title}, ${mediaMetadata.artist}"
+                    "MedX-LOG %%% - media meta data changed ${mediaMetadata.title}, ${mediaMetadata.artist}"
                 )
                 listener?.onReceiveInfoMediaMetaData(mediaMetadata)
             } catch (e: Throwable) {
                 Log.e(
                     this::class.java.simpleName,
-                    "Medx-LOG %%% - failed to receive audio meta data",
+                    "MedX-LOG %%% - failed to receive audio meta data",
                     e
                 )
             }
@@ -297,40 +297,48 @@ class MedxAudioPlayerManager(val context: Context) {
             activity.registerReceiver(
                 audioDurationInfoReceiver,
                 IntentFilter(MedxConstant.ACTION_AUDIO_DURATION_INFO),
-                Context.RECEIVER_NOT_EXPORTED,
+                Context.RECEIVER_EXPORTED,
             )
             activity.registerReceiver(
                 audioPositionInfoReceiver,
                 IntentFilter(MedxConstant.ACTION_AUDIO_POSITION_INFO),
-                Context.RECEIVER_NOT_EXPORTED,
+                Context.RECEIVER_EXPORTED,
             )
             activity.registerReceiver(
                 audioStateInfoReceiver,
                 IntentFilter(MedxConstant.ACTION_AUDIO_STATE_INFO),
-                Context.RECEIVER_NOT_EXPORTED,
+                Context.RECEIVER_EXPORTED,
             )
             activity.registerReceiver(
                 audioMetaDataInfoReceiver,
                 IntentFilter(MedxConstant.ACTION_AUDIO_MEDIA_META_DATA_INFO),
-                Context.RECEIVER_NOT_EXPORTED,
+                Context.RECEIVER_EXPORTED,
             )
 
         } else {
-            activity.registerReceiver(
+            ContextCompat.registerReceiver(
+                activity,
                 audioDurationInfoReceiver,
                 IntentFilter(MedxConstant.ACTION_AUDIO_DURATION_INFO),
+                ContextCompat.RECEIVER_EXPORTED
             )
-            activity.registerReceiver(
+            ContextCompat.registerReceiver(
+                activity,
                 audioPositionInfoReceiver,
                 IntentFilter(MedxConstant.ACTION_AUDIO_POSITION_INFO),
+                ContextCompat.RECEIVER_EXPORTED
             )
-            activity.registerReceiver(
+            ContextCompat.registerReceiver(
+                activity,
                 audioStateInfoReceiver,
                 IntentFilter(MedxConstant.ACTION_AUDIO_STATE_INFO),
+                ContextCompat.RECEIVER_EXPORTED
             )
-            activity.registerReceiver(
+            ContextCompat.registerReceiver(
+                activity,
                 audioMetaDataInfoReceiver,
                 IntentFilter(MedxConstant.ACTION_AUDIO_MEDIA_META_DATA_INFO),
+                ContextCompat.RECEIVER_EXPORTED
             )
         }
     }
@@ -346,7 +354,7 @@ class MedxAudioPlayerManager(val context: Context) {
     interface Listener {
         fun onReceiveInfoDuration(duration: Long)
         fun onReceiveInfoPosition(position: Long)
-        fun onReceiveInfoState(state: MedxAudioPlayerState)
+        fun onReceiveInfoState(state: MedxPlayerState)
         fun onReceiveInfoMediaMetaData(mediaMetadata: MediaMetadata)
     }
 }

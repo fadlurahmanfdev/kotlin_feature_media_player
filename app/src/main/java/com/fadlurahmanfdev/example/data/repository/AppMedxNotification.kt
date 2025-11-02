@@ -10,7 +10,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.fadlurahmanfdev.example.R
 import com.fadlurahmanfdev.example.domain.receiver.AppMedxAudioPlayerReceiver
-import com.fadlurahmanfdev.medx_player.MedxAudioPlayerManager
+import com.fadlurahmanfdev.medx_player.MedxPlayerManager
 import com.fadlurahmanfdev.medx_player.notification.BaseMedxNotification
 
 class AppMedxNotification(context: Context) : BaseMedxNotification(context),
@@ -49,7 +49,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                             R.drawable.baseline_skip_previous_24
                         ),
                         "Previous",
-                        MedxAudioPlayerManager.getSkipToPreviousAudioPendingIntent(
+                        MedxPlayerManager.getSkipToPreviousAudioPendingIntent(
                             context,
                             1,
                             AppMedxAudioPlayerReceiver::class.java
@@ -64,7 +64,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                             R.drawable.baseline_skip_previous_24
                         ),
                         "Previous",
-                        MedxAudioPlayerManager.getNonePendingIntent(
+                        MedxPlayerManager.getNonePendingIntent(
                             context,
                             AppMedxAudioPlayerReceiver::class.java
                         )
@@ -77,7 +77,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                     NotificationCompat.Action(
                         IconCompat.createWithResource(context, R.drawable.baseline_pause_24),
                         "Pause",
-                        MedxAudioPlayerManager.getPauseAudioPendingIntent(
+                        MedxPlayerManager.getPauseAudioPendingIntent(
                             context,
                             2,
                             AppMedxAudioPlayerReceiver::class.java
@@ -89,7 +89,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                     NotificationCompat.Action(
                         IconCompat.createWithResource(context, R.drawable.baseline_play_arrow_24),
                         "Resume",
-                        MedxAudioPlayerManager.getResumePendingIntent(
+                        MedxPlayerManager.getResumePendingIntent(
                             context,
                             requestCode = 3,
                             notificationId = 1,
@@ -102,7 +102,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                     NotificationCompat.Action(
                         IconCompat.createWithResource(context, R.drawable.baseline_play_arrow_24),
                         "Replay",
-                        MedxAudioPlayerManager.getResumePendingIntent(
+                        MedxPlayerManager.getResumePendingIntent(
                             context,
                             requestCode = 3,
                             notificationId = 1,
@@ -115,7 +115,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                     NotificationCompat.Action(
                         IconCompat.createWithResource(context, R.drawable.baseline_play_arrow_24),
                         "Play",
-                        MedxAudioPlayerManager.getNonePendingIntent(
+                        MedxPlayerManager.getNonePendingIntent(
                             context,
                             AppMedxAudioPlayerReceiver::class.java
                         )
@@ -128,7 +128,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                     NotificationCompat.Action(
                         IconCompat.createWithResource(context, R.drawable.baseline_skip_next_24),
                         "Next",
-                        MedxAudioPlayerManager.getSkipToNextAudioPendingIntent(
+                        MedxPlayerManager.getSkipToNextAudioPendingIntent(
                             context,
                             requestCode = 4,
                             AppMedxAudioPlayerReceiver::class.java
@@ -140,7 +140,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
                     NotificationCompat.Action(
                         IconCompat.createWithResource(context, R.drawable.baseline_skip_next_24),
                         "Next",
-                        MedxAudioPlayerManager.getNonePendingIntent(
+                        MedxPlayerManager.getNonePendingIntent(
                             context,
                             AppMedxAudioPlayerReceiver::class.java
                         )
@@ -159,7 +159,7 @@ class AppMedxNotification(context: Context) : BaseMedxNotification(context),
             duration = duration,
             actions = actions,
             onSeekToPosition = { positionSeekTo ->
-                MedxAudioPlayerManager.sendBroadcastSeekToPosition(
+                MedxPlayerManager.sendBroadcastSeekToPosition(
                     context,
                     position = positionSeekTo,
                     notificationId = notificationId,
