@@ -115,6 +115,22 @@ class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
 }
 ```
 
+#### Listening MetaData Info From Service
+
+To listening Audio State, Position, Duration from Foreground Service, you need to implement register receiver
+
+```kotlin
+    override fun onPause() {
+        medxAudioPlayerManager.unregisterReceiver(this)
+        super.onPause()
+    }
+
+    override fun onResume() {
+        medxAudioPlayerManager.registerReceiver(this)
+        super.onResume()
+    }
+```
+
 #### Create Broadcast Receiver
 
 ```kotlin
