@@ -88,7 +88,6 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerMana
         tvArtist.text = "-"
 
         medxAudioPlayerManager = MedxPlayerManager(this)
-        medxAudioPlayerManager.registerReceiver(this)
         medxAudioPlayerManager.addListener(this)
 
         ivPlay.setOnClickListener {
@@ -157,6 +156,16 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerMana
             mediaItems = mediaItems,
             AppMedxAudioPlayerService::class.java
         )
+    }
+
+    override fun onPause() {
+        medxAudioPlayerManager.unregisterReceiver(this)
+        super.onPause()
+    }
+
+    override fun onResume() {
+        medxAudioPlayerManager.registerReceiver(this)
+        super.onResume()
     }
 
     @UnstableApi
