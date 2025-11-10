@@ -343,6 +343,21 @@ class MedxPlayerManager(val context: Context) {
         }
     }
 
+    fun unregisterReceiver(activity: Activity) {
+        activity.unregisterReceiver(
+            audioDurationInfoReceiver,
+        )
+        activity.unregisterReceiver(
+            audioPositionInfoReceiver,
+        )
+        activity.unregisterReceiver(
+            audioStateInfoReceiver,
+        )
+        activity.unregisterReceiver(
+            audioMetaDataInfoReceiver,
+        )
+    }
+
     fun addListener(listener: Listener) {
         this.listener = listener
     }
