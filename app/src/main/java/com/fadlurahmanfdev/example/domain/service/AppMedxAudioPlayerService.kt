@@ -3,12 +3,11 @@ package com.fadlurahmanfdev.example.domain.service
 import android.app.Notification
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.MediaSession
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -23,7 +22,7 @@ class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
 
     var albumArtBitmap: Bitmap? = null
 
-    override fun onInitAndCreateMediaNotificationChannel() {
+    override fun onCreateMedxAudioPlayerService() {
         appMedxNotificationRepository =
             AppMedxNotification(applicationContext)
         appMedxNotificationRepository.createMediaNotificationChannel()
@@ -32,7 +31,7 @@ class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
     override fun idleAudioNotification(
         notificationId: Int,
         mediaItem: MediaItem,
-        mediaSession: MediaSessionCompat,
+        mediaSession: MediaSession,
         onReady: (notification: Notification) -> Unit
     ) {
         if (mediaItem.mediaMetadata.artworkUri != null) {
@@ -49,11 +48,6 @@ class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
                             albumArtBitmap = albumArtBitmap,
                             context = applicationContext,
                             notificationId = notificationId,
-                            playbackStateCompat = PlaybackStateCompat.STATE_NONE,
-                            title = mediaItem.mediaMetadata.title?.toString() ?: "-",
-                            artist = mediaItem.mediaMetadata.artist?.toString() ?: "-",
-                            position = 0,
-                            duration = 0,
                             mediaSession = mediaSession
                         )
                         onReady(notification)
@@ -69,11 +63,6 @@ class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
                 albumArtBitmap = null,
                 context = applicationContext,
                 notificationId = notificationId,
-                playbackStateCompat = PlaybackStateCompat.STATE_NONE,
-                title = mediaItem.mediaMetadata.title?.toString() ?: "-",
-                artist = mediaItem.mediaMetadata.artist?.toString() ?: "-",
-                position = 0,
-                duration = 0,
                 mediaSession = mediaSession
             )
             onReady(notification)
@@ -121,22 +110,10 @@ class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
     private fun updateNotification() {
         if (mediaSession == null) return
 
-        val playbackStateCompat = when (medxPlayerState) {
-            MedxPlayerState.IDLE, MedxPlayerState.BUFFERING, MedxPlayerState.READY, MedxPlayerState.PLAYING -> PlaybackStateCompat.STATE_PLAYING
-            MedxPlayerState.PAUSED -> PlaybackStateCompat.STATE_PAUSED
-            MedxPlayerState.STOPPED -> PlaybackStateCompat.STATE_STOPPED
-            MedxPlayerState.ENDED -> PlaybackStateCompat.STATE_STOPPED
-        }
-
         appMedxNotificationRepository.updateMediaNotification(
             albumArtBitmap = albumArtBitmap,
             context = applicationContext,
             notificationId = notificationId,
-            playbackStateCompat = playbackStateCompat,
-            title = mediaMetadata.title?.toString() ?: "-",
-            artist = mediaMetadata.artist?.toString() ?: "-",
-            position = position,
-            duration = duration,
             mediaSession = mediaSession!!
         )
     }

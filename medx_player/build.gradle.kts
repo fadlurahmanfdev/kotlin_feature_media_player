@@ -49,7 +49,6 @@ dependencies {
     api("androidx.media3:media3-common:$media3_version")
     api("androidx.media3:media3-exoplayer-hls:$media3_version")
     api("androidx.media3:media3-session:$media3_version")
-    api("androidx.media:media:1.7.0")
 }
 
 mavenPublishing {

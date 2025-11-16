@@ -47,7 +47,7 @@ class MedxPlayerManager(val context: Context) {
             intent.apply {
                 action = MedxConstant.ACTION_PAUSE_AUDIO
             }
-            ContextCompat.startForegroundService(context, intent)
+            context.startService(intent)
         }
 
         @UnstableApi
@@ -64,6 +64,18 @@ class MedxPlayerManager(val context: Context) {
             ContextCompat.startForegroundService(context, intent)
         }
 
+        @UnstableApi
+        fun <T : BaseMedxAudioPlayerService> stop(
+            context: Context,
+            clazz: Class<T>,
+        ) {
+            val intent = Intent(context, clazz)
+            intent.apply {
+                action = MedxConstant.ACTION_STOP_AUDIO
+            }
+            context.startService(intent)
+        }
+
         fun <T : BaseMedxAudioPlayerService> skipToPrevious(
             context: Context,
             clazz: Class<T>,
@@ -72,7 +84,7 @@ class MedxPlayerManager(val context: Context) {
             intent.apply {
                 action = MedxConstant.ACTION_SKIP_TO_PREVIOUS_AUDIO
             }
-            ContextCompat.startForegroundService(context, intent)
+            context.startService(intent)
         }
 
         fun <T : BaseMedxAudioPlayerService> skipToNext(
@@ -83,7 +95,7 @@ class MedxPlayerManager(val context: Context) {
             intent.apply {
                 action = MedxConstant.ACTION_SKIP_TO_NEXT_AUDIO
             }
-            ContextCompat.startForegroundService(context, intent)
+            context.startService(intent)
         }
 
         fun <T : BaseMedxAudioPlayerService> seekToPosition(
@@ -96,7 +108,7 @@ class MedxPlayerManager(val context: Context) {
                 action = MedxConstant.ACTION_SEEK_TO_POSITION_AUDIO
                 putExtra(MedxConstant.PARAM_POSITION, position)
             }
-            ContextCompat.startForegroundService(context, intent)
+            context.startService(intent)
         }
 
         fun <T : BaseMedxAudioPlayerReceiver> getPauseAudioPendingIntent(

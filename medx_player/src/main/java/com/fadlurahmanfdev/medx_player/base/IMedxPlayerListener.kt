@@ -28,4 +28,11 @@ interface IMedxPlayerListener {
      * @param mediaMetadata the content of meta data of a media item
      * */
     fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {}
+
+    /**
+     * Triggered when the is playing changed.
+     *
+     * @param isPlaying whether the media is playing.
+     * */
+    fun onIsPlayingChanged(isPlaying: Boolean) {}
 }
