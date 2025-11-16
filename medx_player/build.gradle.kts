@@ -55,7 +55,7 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
 
-    coordinates("com.fadlurahmanfdev", "medx_player", "0.0.2")
+    coordinates("com.fadlurahmanfdev", "medx_player", "1.0.0")
 
     pom {
         name.set("Medx Player")
