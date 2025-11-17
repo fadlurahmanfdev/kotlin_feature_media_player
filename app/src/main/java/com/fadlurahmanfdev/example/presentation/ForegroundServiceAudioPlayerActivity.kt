@@ -244,6 +244,5 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerMana
     override fun onReceiveInfoMediaMetaData(mediaMetadata: MediaMetadata) {
         tvTitle.text = mediaMetadata.title
         tvArtist.text = mediaMetadata.artist
-
     }
 }

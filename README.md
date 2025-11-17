@@ -60,7 +60,7 @@ mediaItems.add(
 
 ## Simple Medx Audio Player (Activity-bound)
 
-Best for short audio playback that should stop when activity closes.
+Best for short audio playback that should stop when activity finished.
 
 ### Initialization
 
@@ -78,6 +78,7 @@ medxAudioPlayer.playMedia(mediaItems)
 // Control playback
 medxAudioPlayer.pause()
 medxAudioPlayer.resume()
+medxAudioPlayer.stop()
 medxAudioPlayer.skipToNextMediaItem()
 medxAudioPlayer.skipToPreviousMediaItem()
 medxAudioPlayer.seekToPosition(5000L) // milliseconds
@@ -89,11 +90,11 @@ Best for long-running audio playback that should continue when app is background
 
 ### Initialization
 
-#### Create Service Class
+#### Create Service Class & Create Notification Channel
 
 ```kotlin
 class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
-    override fun onInitAndCreateMediaNotificationChannel() {
+    override fun onCreateMedxAudioPlayerService() {
         // Initialize notification channel
         createNotificationChannel(
             channelId = "music_channel",
@@ -112,14 +113,62 @@ class AppMedxAudioPlayerService : BaseMedxAudioPlayerService() {
         val notification = buildNotification(mediaItem)
         onReady(notification)
     }
+
+
+    override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+        super.onMediaMetadataChanged(mediaMetadata)
+        if (mediaMetadata.artworkUri != null) {
+            // process build map, could be with Glide library
+        }
+    }
+
+    override fun onDurationChanged(duration: Long) {
+        super.onDurationChanged(duration)
+        updateNotification()
+    }
+
+    override fun onPositionChanged(position: Long) {
+        super.onPositionChanged(position)
+        updateNotification()
+    }
+
+    override fun onPlayerStateChanged(state: MedxPlayerState) {
+        super.onPlayerStateChanged(state)
+        updateNotification()
+    }
+
+
+    private fun updateNotification() {
+        if (mediaSession == null) return
+
+        appMedxNotificationRepository.updateMediaNotification(
+            albumArtBitmap = albumArtBitmap,
+            context = applicationContext,
+            notificationId = notificationId,
+            mediaSession = mediaSession!!
+        )
+    }
 }
 ```
 
 #### Listening MetaData Info From Service
 
-To listening Audio State, Position, Duration from Foreground Service, you need to implement register receiver
+To listening Audio State, Position, Duration from Foreground Service, you need to implement MedxPlayerListener & Register Custom Receiver
 
 ```kotlin
+class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerManager.Listener {
+    lateinit var medxAudioPlayerManager: MedxPlayerManager
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // other code
+
+        // register listener inside onCreate of an AppCompatActivity
+        medxAudioPlayerManager = MedxPlayerManager(this)
+        medxAudioPlayerManager.addListener(this)
+
+        // other code
+    }
+
     override fun onPause() {
         medxAudioPlayerManager.unregisterReceiver(this)
         super.onPause()
@@ -129,28 +178,52 @@ To listening Audio State, Position, Duration from Foreground Service, you need t
         medxAudioPlayerManager.registerReceiver(this)
         super.onResume()
     }
+}
 ```
 
 #### Create Broadcast Receiver
 
 ```kotlin
-class AppAudioPlayerReceiver : BaseMedxAudioPlayerReceiver() {
+class AppMedxAudioPlayerReceiver : BaseMedxAudioPlayerReceiver() {
     override fun onPauseAudio(context: Context) {
-        // Handle pause action from notification
+        MedxPlayerManager.pause(context = context, clazz = AppMedxAudioPlayerService::class.java)
     }
 
     override fun onResumeAudio(context: Context, notificationId: Int) {
-        // Handle play/resume action
+        MedxPlayerManager.resume(
+            context = context,
+            notificationId = notificationId,
+            clazz = AppMedxAudioPlayerService::class.java
+        )
     }
 
-    // ... implement other callbacks ...
+    override fun onSkipToPreviousAudio(context: Context) {
+        MedxPlayerManager.skipToPrevious(
+            context = context,
+            clazz = AppMedxAudioPlayerService::class.java
+        )
+    }
+
+    override fun onSkipToNextAudio(context: Context) {
+        MedxPlayerManager.skipToNext(
+            context = context,
+            clazz = AppMedxAudioPlayerService::class.java
+        )
+    }
+
+    override fun onSeekToPositionAudio(context: Context, position:Long) {
+        MedxPlayerManager.seekToPosition(
+            context = context,
+            position = position,
+            clazz = AppMedxAudioPlayerService::class.java
+        )
+    }
 }
 ```
 
 #### Register In Android Manifest
 
 ```xml
-
 <manifest>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
@@ -164,17 +237,20 @@ class AppAudioPlayerReceiver : BaseMedxAudioPlayerReceiver() {
             <intent-filter>
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_STOP_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_NEXT_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SEEK_TO_POSITION_AUDIO" />
             </intent-filter>
         </receiver>
-        <service android:name=".domain.service.AppMedxAudioPlayerService" android:exported="false"
+        <service android:name=".domain.service.AppMedxAudioPlayerService" 
+            android:exported="false"
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_STOP_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_NEXT_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SEEK_TO_POSITION_AUDIO" />
@@ -191,7 +267,7 @@ class AppAudioPlayerReceiver : BaseMedxAudioPlayerReceiver() {
 ### Playback Control
 
 ```kotlin
-// Start playback
+// Start media in foreground service
 MedxAudioPlayerManager.play(
     context,
     mediaItems,
