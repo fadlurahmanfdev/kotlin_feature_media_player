@@ -7,6 +7,8 @@ object MedxConstant {
         "com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO"
     const val ACTION_RESUME_AUDIO =
         "com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO"
+    const val ACTION_STOP_AUDIO =
+        "com.fadlurahmanfdev.medx.ACTION_STOP_AUDIO"
     const val ACTION_SKIP_TO_PREVIOUS_AUDIO =
         "com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO"
     const val ACTION_SKIP_TO_NEXT_AUDIO =

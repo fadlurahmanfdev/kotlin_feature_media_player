@@ -152,8 +152,13 @@ abstract class BaseMedxPlayer(private val context: Context) : IMedxPlayer,
     /**
      * Remove listener audio position changed every n seconds.
      * */
-    fun removeListenerPosition() {
+    private fun removeListenerPosition() {
         handler.removeCallbacks(audioPositionRunnable)
+    }
+
+    private fun updatePosition(position: Long) {
+        _position = position
+        listener?.onPositionChanged(position)
     }
 
     /**
@@ -234,7 +239,7 @@ abstract class BaseMedxPlayer(private val context: Context) : IMedxPlayer,
      *
      * */
     override fun resume() {
-        if (medxPlayerState == MedxPlayerState.PAUSED) {
+        if (medxPlayerState == MedxPlayerState.PAUSED || medxPlayerState == MedxPlayerState.READY) {
             exoPlayer.play()
             onPlayerStateChanged(MedxPlayerState.PLAYING)
             listenPosition()
@@ -246,9 +251,12 @@ abstract class BaseMedxPlayer(private val context: Context) : IMedxPlayer,
      *
      * */
     override fun stop() {
-        if (medxPlayerState == MedxPlayerState.PLAYING || medxPlayerState == MedxPlayerState.STOPPED) {
+        if (medxPlayerState == MedxPlayerState.READY || medxPlayerState == MedxPlayerState.PLAYING
+            || medxPlayerState == MedxPlayerState.PAUSED || medxPlayerState == MedxPlayerState.BUFFERING
+        ) {
             removeListenerPosition()
             exoPlayer.stop()
+            updatePosition(0L)
             onPlayerStateChanged(MedxPlayerState.STOPPED)
         }
     }
@@ -269,7 +277,7 @@ abstract class BaseMedxPlayer(private val context: Context) : IMedxPlayer,
     override fun skipToPreviousMediaItem() {
         if (hasPreviousMediaItem()) {
             exoPlayer.seekToPreviousMediaItem()
-            _position = 0L
+            updatePosition(0L)
         } else {
             Log.i(
                 this::class.java.simpleName,
@@ -294,7 +302,7 @@ abstract class BaseMedxPlayer(private val context: Context) : IMedxPlayer,
     override fun skipToNextMediaItem() {
         if (hasNextMediaItem()) {
             exoPlayer.seekToNextMediaItem()
-            _position = 0L
+            updatePosition(0L)
         } else {
             Log.i(
                 this::class.java.simpleName,
@@ -311,7 +319,7 @@ abstract class BaseMedxPlayer(private val context: Context) : IMedxPlayer,
      * */
     override fun seekToPosition(position: Long) {
         exoPlayer.seekTo(position)
-        _position = position
+        updatePosition(position)
     }
 
     /**
@@ -367,9 +375,13 @@ abstract class BaseMedxPlayer(private val context: Context) : IMedxPlayer,
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         super.onIsPlayingChanged(isPlaying)
-        if (isPlaying) {
+        if (isPlaying && exoPlayer.playbackState == Player.STATE_READY) {
             onPlayerStateChanged(MedxPlayerState.PLAYING)
+        } else if (!isPlaying && exoPlayer.playbackState == Player.STATE_READY) {
+            onPlayerStateChanged(MedxPlayerState.PAUSED)
         }
+
+        listener?.onIsPlayingChanged(isPlaying)
     }
 
     override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {

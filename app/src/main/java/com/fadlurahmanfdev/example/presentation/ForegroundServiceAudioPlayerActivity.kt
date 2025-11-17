@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
@@ -20,8 +21,10 @@ import com.fadlurahmanfdev.example.domain.service.AppMedxAudioPlayerService
 import com.fadlurahmanfdev.medx_player.MedxPlayerManager
 import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState
 import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState.BUFFERING
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState.ENDED
 import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState.PAUSED
 import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState.PLAYING
+import com.fadlurahmanfdev.medx_player.data.enums.MedxPlayerState.READY
 import com.fadlurahmanfdev.medx_player.utilities.MedxPlayerUtilities
 
 class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerManager.Listener {
@@ -34,6 +37,7 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerMana
 
     lateinit var ivPrevious: ImageView
     lateinit var ivPlay: ImageView
+    lateinit var ivStop: ImageView
     lateinit var ivNext: ImageView
     lateinit var tvPosition: TextView
     lateinit var tvDuration: TextView
@@ -52,6 +56,7 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerMana
         tvArtist = findViewById(R.id.tv_artist)
         ivPrevious = findViewById(R.id.iv_previous)
         ivPlay = findViewById(R.id.iv_play)
+        ivStop = findViewById(R.id.iv_stop)
         ivNext = findViewById(R.id.iv_next)
         tvPosition = findViewById(R.id.tv_progress)
         tvDuration = findViewById(R.id.tv_duration)
@@ -99,10 +104,19 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerMana
                     )
                 }
 
-                PAUSED -> {
+                PAUSED, READY -> {
                     MedxPlayerManager.resume(
                         this,
                         notificationId = 1,
+                        AppMedxAudioPlayerService::class.java
+                    )
+                }
+
+                MedxPlayerState.STOPPED, ENDED -> {
+                    MedxPlayerManager.playAudio(
+                        this,
+                        notificationId = 1,
+                        mediaItems = mediaItems,
                         AppMedxAudioPlayerService::class.java
                     )
                 }
@@ -111,6 +125,13 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerMana
 
                 }
             }
+        }
+
+        ivStop.setOnClickListener {
+            MedxPlayerManager.stop(
+                this,
+                AppMedxAudioPlayerService::class.java
+            )
         }
 
         ivPrevious.setOnClickListener {
@@ -207,12 +228,21 @@ class ForegroundServiceAudioPlayerActivity : AppCompatActivity(), MedxPlayerMana
             }
         }
 
+        when (state) {
+            MedxPlayerState.STOPPED, ENDED -> {
+                ivStop.visibility = View.GONE
+            }
+
+            else -> {
+                ivStop.visibility = View.VISIBLE
+            }
+        }
+
         Log.d(this::class.java.simpleName, "Medx-LOG %%% - receive info state: $state")
     }
 
     override fun onReceiveInfoMediaMetaData(mediaMetadata: MediaMetadata) {
         tvTitle.text = mediaMetadata.title
         tvArtist.text = mediaMetadata.artist
-
     }
 }

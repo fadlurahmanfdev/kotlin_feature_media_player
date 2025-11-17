@@ -64,6 +64,7 @@
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PLAY_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_PAUSE_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_RESUME_AUDIO" />
+                <action android:name="com.fadlurahmanfdev.medx.ACTION_STOP_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_PREVIOUS_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SKIP_TO_NEXT_AUDIO" />
                 <action android:name="com.fadlurahmanfdev.medx.ACTION_SEEK_TO_POSITION_AUDIO" />

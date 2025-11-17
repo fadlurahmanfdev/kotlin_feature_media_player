@@ -49,14 +49,13 @@ dependencies {
     api("androidx.media3:media3-common:$media3_version")
     api("androidx.media3:media3-exoplayer-hls:$media3_version")
     api("androidx.media3:media3-session:$media3_version")
-    api("androidx.media:media:1.7.0")
 }
 
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
 
-    coordinates("com.fadlurahmanfdev", "medx_player", "0.0.2")
+    coordinates("com.fadlurahmanfdev", "medx_player", "1.0.0")
 
     pom {
         name.set("Medx Player")
